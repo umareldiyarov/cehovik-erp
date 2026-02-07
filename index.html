@@ -270,6 +270,41 @@
     let currentStep = 1;
     const titles = ["Параметры заказа", "Ткани и Подклад", "Клеевые", "Фурнитура", "Трудозатраты", "Расходы цеха", "Цена продажи", "Итоги"];
 
+    // ФУНКЦИЯ СОХРАНЕНИЯ (LocalStorage)
+    function saveToLocal() {
+        const data = {
+            m_name: document.getElementById('m_name').value,
+            qty: document.getElementById('qty').value,
+            cl_price_val: document.getElementById('price_cl_val').value,
+            fixed_exp: document.getElementById('fixed_exp').value,
+            fot_values: Array.from(document.querySelectorAll('.fot-in')).map(i => i.value)
+        };
+        localStorage.setItem('cehovik_data', JSON.stringify(data));
+    }
+
+    // ФУНКЦИЯ ЗАГРУЗКИ
+    function loadFromLocal() {
+        const saved = localStorage.getItem('cehovik_data');
+        if (saved) {
+            const data = JSON.parse(saved);
+            if(document.getElementById('m_name')) document.getElementById('m_name').value = data.m_name || '';
+            if(document.getElementById('qty')) document.getElementById('qty').value = data.qty || '';
+            if(document.getElementById('price_cl_val')) document.getElementById('price_cl_val').value = data.cl_price_val || '';
+            if(document.getElementById('fixed_exp')) document.getElementById('fixed_exp').value = data.fixed_exp || '';
+
+            const fotInputs = document.querySelectorAll('.fot-in');
+            if (data.fot_values) {
+                data.fot_values.forEach((val, i) => {
+                    if (fotInputs[i]) fotInputs[i].value = val;
+                });
+            }
+            if(typeof calc === "function") calc();
+        }
+    }
+
+    // Запускаем загрузку при старте
+    window.addEventListener('load', loadFromLocal);
+
     function goToStep(n) {
         currentStep = n;
         document.querySelectorAll('.step-content').forEach(s => s.classList.remove('active'));
@@ -292,6 +327,7 @@
         document.getElementById('cl_curr_label').innerText = curr;
         rateIn.disabled = (curr === 'KGS');
         if(curr === 'KGS') { rateIn.value = 1; } else { rateIn.value = ''; rateIn.placeholder = "Введите курс"; }
+        saveToLocal(); // Сохраняем при смене курса
     }
 
     function addFabric(data = null) {
@@ -395,6 +431,7 @@
     }
 
     function calc() {
+        saveToLocal(); // <-- Просто добавь эту строчку в начало своей функции calc
         const qty = parseFloat(document.getElementById('qty').value) || 0;
         const taxRate = parseFloat(document.getElementById('tax_rate').value);
         const fixedExp = parseFloat(document.getElementById('fixed_exp').value) || 0;
