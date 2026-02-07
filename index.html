@@ -638,29 +638,31 @@
         const priceInput = document.getElementById('price_cl_val');
         if (clPriceVal > 0 && (clPriceVal * clRate) <= unitCost) { priceInput.classList.add('loss-warning'); } else { priceInput.classList.remove('loss-warning'); }
 
-        // Блок вывода в ИТОГИ (Шаг 8)
         document.getElementById('res_m_name').innerText = mName;
-        document.getElementById('res_qty').innerText = qty + ' шт';
+    document.getElementById('res_qty').innerText = qty + ' шт';
 
-        // Было Math.round(), стало .toFixed(2) для точности
-        document.getElementById('monitor_cost').innerText = unitCost.toFixed(2) + ' сом';
-        document.getElementById('res_unit_cost').innerText = unitCost.toFixed(2) + ' сом';
-        document.getElementById('res_total_exp').innerText = totalExp.toFixed(2) + ' сом';
-        document.getElementById('res_revenue').innerText = revenueSom.toFixed(2) + ' сом';
-        document.getElementById('res_tax').innerText = tax.toFixed(2) + ' сом';
+    // Округляем до 1 знака (например, 402.7), а потом форматируем красиво с пробелами
+    document.getElementById('monitor_cost').innerText = (Math.round(unitCost * 10) / 10).toLocaleString() + ' сом';
+    document.getElementById('res_unit_cost').innerText = (Math.round(unitCost * 10) / 10).toLocaleString() + ' сом';
+    document.getElementById('res_total_exp').innerText = (Math.round(totalExp * 10) / 10).toLocaleString() + ' сом';
+    document.getElementById('res_revenue').innerText = (Math.round(revenueSom * 10) / 10).toLocaleString() + ' сом';
+    document.getElementById('res_tax').innerText = (Math.round(tax * 10) / 10).toLocaleString() + ' сом';
 
-        let subText = `Выручка: ${(clPriceVal * qty).toFixed(2)} ${clCurr}`;
-        if(clCurr !== 'KGS') { subText += ` | Итого в сомах: ${revenueSom.toFixed(2)} сом`; }
-        document.getElementById('cl_price_sub').innerText = clPriceVal > 0 ? subText : "";
-        document.getElementById('res_rate_val').innerText = `1 ${clCurr} = ${clRate} сом`;
-
-        const profitEl = document.getElementById('res_profit');
-        // Здесь тоже ставим .toFixed(2) чтобы прибыль была точной
-        profitEl.innerText = profit.toFixed(2) + ' сом';
-        profitEl.style.color = profit < 0 ? 'var(--danger)' : 'var(--success)';
-        document.getElementById('res_detailed_materials').innerHTML = materialsHTML;
+    let subVal = Math.round((clPriceVal * qty) * 10) / 10;
+    let subText = `Выручка: ${subVal.toLocaleString()} ${clCurr}`;
+    if(clCurr !== 'KGS') {
+        let revSomVal = Math.round(revenueSom * 10) / 10;
+        subText += ` | Итого в сомах: ${revSomVal.toLocaleString()} сом`;
     }
+    document.getElementById('cl_price_sub').innerText = clPriceVal > 0 ? subText : "";
+    document.getElementById('res_rate_val').innerText = `1 ${clCurr} = ${clRate} сом`;
 
+    const profitEl = document.getElementById('res_profit');
+    let profitVal = Math.round(profit * 10) / 10;
+    profitEl.innerText = profitVal.toLocaleString() + ' сом';
+    profitEl.style.color = profit < 0 ? 'var(--danger)' : 'var(--success)';
+    document.getElementById('res_detailed_materials').innerHTML = materialsHTML;
+}
 
 
     function shareWhatsApp() {
