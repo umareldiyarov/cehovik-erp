@@ -607,7 +607,12 @@
         document.getElementById('fot-total-badge').innerText = fotUnit.toFixed(0) + ' сом';
         const totalMatUnit = totalFabricsUnit + totalGluesUnit + totalAccsUnit;
         const unitCost = totalMatUnit + fotUnit + fixedExp;
-        const totalExp = unitCost * qty;
+
+        // ПОПРАВКА ТУТ: Берем округленную себестоимость (473.5)
+        const unitCostRounded = Math.round(unitCost * 10) / 10;
+        // И умножаем её на количество (получаем ровно 473 500)
+        const totalExp = unitCostRounded * qty;
+
         const revenueSom = clPriceVal * clRate * qty;
         const tax = revenueSom * taxRate;
         const profit = revenueSom - totalExp - tax;
@@ -617,23 +622,23 @@
 
         // Ткани и подклад
         document.getElementById('res_sum_fabrics').innerHTML =
-            `<span style="font-weight:400; color:#86868b; margin-right:10px;">(${Math.round(totalFabricsUnit)} сом/ед)</span>` +
-            `<span>${Math.round(totalFabricsUnit * qty).toLocaleString()} сом</span>`;
+            `<span style="font-weight:400; color:#86868b; margin-right:10px;">(${(Math.round(totalFabricsUnit * 10) / 10)} сом/ед)</span>` +
+            `<span>${(Math.round(totalFabricsUnit * qty * 10) / 10).toLocaleString()} сом</span>`;
 
         // Клеевые материалы
         document.getElementById('res_sum_glues').innerHTML =
-            `<span style="font-weight:400; color:#86868b; margin-right:10px;">(${Math.round(totalGluesUnit)} сом/ед)</span>` +
-            `<span>${Math.round(totalGluesUnit * qty).toLocaleString()} сом</span>`;
+            `<span style="font-weight:400; color:#86868b; margin-right:10px;">(${(Math.round(totalGluesUnit * 10) / 10)} сом/ед)</span>` +
+            `<span>${(Math.round(totalGluesUnit * qty * 10) / 10).toLocaleString()} сом</span>`;
 
         // Вся фурнитура
         document.getElementById('res_sum_accs').innerHTML =
-            `<span style="font-weight:400; color:#86868b; margin-right:10px;">(${Math.round(totalAccsUnit)} сом/ед)</span>` +
-            `<span>${Math.round(totalAccsUnit * qty).toLocaleString()} сом</span>`;
+            `<span style="font-weight:400; color:#86868b; margin-right:10px;">(${(Math.round(totalAccsUnit * 10) / 10)} сом/ед)</span>` +
+            `<span>${(Math.round(totalAccsUnit * qty * 10) / 10).toLocaleString()} сом</span>`;
 
         // Работа (ФОТ)
         document.getElementById('res_sum_fot').innerHTML =
-            `<span style="font-weight:400; color:#86868b; margin-right:10px;">(${Math.round(fotUnit)} сом/ед)</span>` +
-            `<span>${Math.round(fotUnit * qty).toLocaleString()} сом</span>`;
+            `<span style="font-weight:400; color:#86868b; margin-right:10px;">(${(Math.round(fotUnit * 10) / 10)} сом/ед)</span>` +
+            `<span>${(Math.round(fotUnit * qty * 10) / 10).toLocaleString()} сом</span>`;
 
         const priceInput = document.getElementById('price_cl_val');
         if (clPriceVal > 0 && (clPriceVal * clRate) <= unitCost) { priceInput.classList.add('loss-warning'); } else { priceInput.classList.remove('loss-warning'); }
@@ -641,10 +646,11 @@
         document.getElementById('res_m_name').innerText = mName;
     document.getElementById('res_qty').innerText = qty + ' шт';
 
-    // Округляем до 1 знака (например, 402.7), а потом форматируем красиво с пробелами
-    document.getElementById('monitor_cost').innerText = (Math.round(unitCost * 10) / 10).toLocaleString() + ' сом';
-    document.getElementById('res_unit_cost').innerText = (Math.round(unitCost * 10) / 10).toLocaleString() + ' сом';
-    document.getElementById('res_total_exp').innerText = (Math.round(totalExp * 10) / 10).toLocaleString() + ' сом';
+    // ВЫВОД: Используем уже посчитанные точные значения
+    document.getElementById('monitor_cost').innerText = unitCostRounded.toLocaleString() + ' сом';
+    document.getElementById('res_unit_cost').innerText = unitCostRounded.toLocaleString() + ' сом';
+    document.getElementById('res_total_exp').innerText = totalExp.toLocaleString() + ' сом';
+
     document.getElementById('res_revenue').innerText = (Math.round(revenueSom * 10) / 10).toLocaleString() + ' сом';
     document.getElementById('res_tax').innerText = (Math.round(tax * 10) / 10).toLocaleString() + ' сом';
 
