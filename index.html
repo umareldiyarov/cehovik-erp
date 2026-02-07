@@ -638,21 +638,25 @@
         const priceInput = document.getElementById('price_cl_val');
         if (clPriceVal > 0 && (clPriceVal * clRate) <= unitCost) { priceInput.classList.add('loss-warning'); } else { priceInput.classList.remove('loss-warning'); }
 
+        // Блок вывода в ИТОГИ (Шаг 8)
         document.getElementById('res_m_name').innerText = mName;
         document.getElementById('res_qty').innerText = qty + ' шт';
-        document.getElementById('monitor_cost').innerText = Math.round(unitCost).toLocaleString() + ' сом';
-        document.getElementById('res_unit_cost').innerText = Math.round(unitCost).toLocaleString() + ' сом';
-        document.getElementById('res_total_exp').innerText = Math.round(totalExp).toLocaleString() + ' сом';
-        document.getElementById('res_revenue').innerText = Math.round(revenueSom).toLocaleString() + ' сом';
-        document.getElementById('res_tax').innerText = Math.round(tax).toLocaleString() + ' сом';
 
-        let subText = `Выручка: ${Math.round(clPriceVal * qty).toLocaleString()} ${clCurr}`;
-        if(clCurr !== 'KGS') { subText += ` | Итого в сомах: ${Math.round(revenueSom).toLocaleString()} сом`; }
+        // Было Math.round(), стало .toFixed(2) для точности
+        document.getElementById('monitor_cost').innerText = unitCost.toFixed(2) + ' сом';
+        document.getElementById('res_unit_cost').innerText = unitCost.toFixed(2) + ' сом';
+        document.getElementById('res_total_exp').innerText = totalExp.toFixed(2) + ' сом';
+        document.getElementById('res_revenue').innerText = revenueSom.toFixed(2) + ' сом';
+        document.getElementById('res_tax').innerText = tax.toFixed(2) + ' сом';
+
+        let subText = `Выручка: ${(clPriceVal * qty).toFixed(2)} ${clCurr}`;
+        if(clCurr !== 'KGS') { subText += ` | Итого в сомах: ${revenueSom.toFixed(2)} сом`; }
         document.getElementById('cl_price_sub').innerText = clPriceVal > 0 ? subText : "";
         document.getElementById('res_rate_val').innerText = `1 ${clCurr} = ${clRate} сом`;
 
         const profitEl = document.getElementById('res_profit');
-        profitEl.innerText = Math.round(profit).toLocaleString() + ' сом';
+        // Здесь тоже ставим .toFixed(2) чтобы прибыль была точной
+        profitEl.innerText = profit.toFixed(2) + ' сом';
         profitEl.style.color = profit < 0 ? 'var(--danger)' : 'var(--success)';
         document.getElementById('res_detailed_materials').innerHTML = materialsHTML;
     }
