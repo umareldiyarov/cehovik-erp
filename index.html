@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>ЦЕХОВИК ERP</title>
@@ -97,6 +99,9 @@
             <div class="card-h">Параметры</div>
             <div><label class="label">Название модели</label><input type="text" id="m_name" placeholder="Название"></div>
         </div>
+        <button onclick="clearData()" style="background: var(--danger); color: white; border: none; padding: 12px; border-radius: 12px; margin-bottom: 15px; width: 100%; font-weight: bold; cursor: pointer;">
+    🗑 Очистить весь расчет
+        </button>
         <button class="btn-next" onclick="goToStep(2)">Далее: Ткани</button>
 
         <div class="author-info">
@@ -109,7 +114,7 @@
     </div>
 
     <div class="info-card">
-        <b>Выпад %:</b> Учет обрезков и брака.
+        <b>Выпад %:</b> Учет обрезков и брака ткани.
         <ul style="padding-left: 20px; margin: 5px 0;">
             <li>Если расход точный — ставьте <b>0</b>.</li>
             <li>Стандартный запас — <b>5-7%</b>.</li>
@@ -270,39 +275,106 @@
     let currentStep = 1;
     const titles = ["Параметры заказа", "Ткани и Подклад", "Клеевые", "Фурнитура", "Трудозатраты", "Расходы цеха", "Цена продажи", "Итоги"];
 
-    // ФУНКЦИЯ СОХРАНЕНИЯ (LocalStorage)
+    // 1. УЛУЧШЕННАЯ ФУНКЦИЯ СОХРАНЕНИЯ (сохраняет каждую строчку)
     function saveToLocal() {
         const data = {
             m_name: document.getElementById('m_name').value,
             qty: document.getElementById('qty').value,
             cl_price_val: document.getElementById('price_cl_val').value,
             fixed_exp: document.getElementById('fixed_exp').value,
+            // Сохраняем все ткани
+            fabrics: Array.from(document.querySelectorAll('.fabric-row')).map(row => ({
+                name: row.querySelector('.f-name').value,
+                use: row.querySelector('.f-use').value,
+                loss: row.querySelector('.f-loss').value,
+                curr: row.querySelector('.f-curr').value,
+                price: row.querySelector('.f-price').value,
+                dav: row.querySelector('.f-dav').checked
+            })),
+            // Сохраняем все клеевые
+            glues: Array.from(document.querySelectorAll('.glue-row')).map(row => ({
+                name: row.querySelector('.g-name').value,
+                mode: row.querySelector('.g-mode').value,
+                price: row.querySelector('.g-price').value,
+                roll: row.querySelector('.g-roll-len').value,
+                use: row.querySelector('.f-use-cm').value,
+                dav: row.querySelector('.g-dav').checked
+            })),
+            // Сохраняем всю фурнитуру
+            accs: Array.from(document.querySelectorAll('.acc-row')).map(row => ({
+                name: row.querySelector('.a-name').value,
+                unit: row.querySelector('.a-unit').value,
+                price: row.querySelector('.a-price').value,
+                use: row.querySelector('.a-use').value,
+                dav: row.querySelector('.a-dav').checked
+            })),
             fot_values: Array.from(document.querySelectorAll('.fot-in')).map(i => i.value)
         };
         localStorage.setItem('cehovik_data', JSON.stringify(data));
     }
 
-    // ФУНКЦИЯ ЗАГРУЗКИ
+    // 2. УЛУЧШЕННАЯ ФУНКЦИЯ ЗАГРУЗКИ (восстанавливает все строчки)
     function loadFromLocal() {
         const saved = localStorage.getItem('cehovik_data');
-        if (saved) {
-            const data = JSON.parse(saved);
-            if(document.getElementById('m_name')) document.getElementById('m_name').value = data.m_name || '';
-            if(document.getElementById('qty')) document.getElementById('qty').value = data.qty || '';
-            if(document.getElementById('price_cl_val')) document.getElementById('price_cl_val').value = data.cl_price_val || '';
-            if(document.getElementById('fixed_exp')) document.getElementById('fixed_exp').value = data.fixed_exp || '';
+        if (!saved) return;
+        const data = JSON.parse(saved);
 
-            const fotInputs = document.querySelectorAll('.fot-in');
-            if (data.fot_values) {
-                data.fot_values.forEach((val, i) => {
-                    if (fotInputs[i]) fotInputs[i].value = val;
-                });
-            }
-            if(typeof calc === "function") calc();
+        document.getElementById('m_name').value = data.m_name || '';
+        document.getElementById('qty').value = data.qty || '';
+        document.getElementById('price_cl_val').value = data.cl_price_val || '';
+        document.getElementById('fixed_exp').value = data.fixed_exp || '';
+
+        // Восстанавливаем ткани
+        if (data.fabrics) {
+            document.getElementById('fabric-list').innerHTML = ''; // очистим
+            data.fabrics.forEach(f => {
+                addFabric();
+                const row = document.querySelector('#fabric-list .fabric-row:last-child');
+                row.querySelector('.f-name').value = f.name;
+                row.querySelector('.f-use').value = f.use;
+                row.querySelector('.f-loss').value = f.loss;
+                row.querySelector('.f-curr').value = f.curr;
+                row.querySelector('.f-price').value = f.price;
+                row.querySelector('.f-dav').checked = f.dav;
+            });
         }
+
+        // Восстанавливаем клеевые
+        if (data.glues) {
+            document.getElementById('glue-list').innerHTML = '';
+            data.glues.forEach(g => {
+                addGlue();
+                const row = document.querySelector('#glue-list .glue-row:last-child');
+                row.querySelector('.g-name').value = g.name;
+                row.querySelector('.g-mode').value = g.mode;
+                row.querySelector('.g-price').value = g.price;
+                row.querySelector('.g-roll-len').value = g.roll;
+                row.querySelector('.f-use-cm').value = g.use;
+                row.querySelector('.g-dav').checked = g.dav;
+            });
+        }
+
+        // Восстанавливаем фурнитуру
+        if (data.accs) {
+            document.getElementById('acc-list').innerHTML = '';
+            data.accs.forEach(a => {
+                addAcc();
+                const row = document.querySelector('#acc-list .acc-row:last-child');
+                row.querySelector('.a-name').value = a.name;
+                row.querySelector('.a-unit').value = a.unit;
+                row.querySelector('.a-price').value = a.price;
+                row.querySelector('.a-use').value = a.use;
+                row.querySelector('.a-dav').checked = a.dav;
+            });
+        }
+
+        const fotInputs = document.querySelectorAll('.fot-in');
+        if (data.fot_values) {
+            data.fot_values.forEach((val, i) => { if (fotInputs[i]) fotInputs[i].value = val; });
+        }
+        if(typeof calc === "function") calc();
     }
 
-    // Запускаем загрузку при старте
     window.addEventListener('load', loadFromLocal);
 
     function goToStep(n) {
@@ -327,23 +399,22 @@
         document.getElementById('cl_curr_label').innerText = curr;
         rateIn.disabled = (curr === 'KGS');
         if(curr === 'KGS') { rateIn.value = 1; } else { rateIn.value = ''; rateIn.placeholder = "Введите курс"; }
-        saveToLocal(); // Сохраняем при смене курса
+        saveToLocal();
     }
 
-    function addFabric(data = null) {
+    function addFabric() {
         const html = `
         <div class="row-item fabric-row" style="grid-template-columns: repeat(3, 1fr);">
-            <div style="grid-column: span 3;"><label class="label">Название (Ткань/Подклад)</label><input type="text" class="f-name" value="${data?.name||''}"></div>
-            <div style="grid-column: span 3;"><label class="label">Расход (М)</label><input type="number" class="f-use" oninput="calc()" value="${data?.use||''}"></div>
-            <div style="grid-column: span 3;"><label class="label">Брак и обрезки ткани (выпад %)</label><input type="number"
-            class="f-loss" oninput="calc()" value="${data?.loss||0}"></div>
+            <div style="grid-column: span 3;"><label class="label">Название (Ткань/Подклад)</label><input type="text" class="f-name" oninput="saveToLocal()"></div>
+            <div style="grid-column: span 3;"><label class="label">Расход (М)</label><input type="number" class="f-use" oninput="calc()"></div>
+            <div style="grid-column: span 3;"><label class="label">Брак и обрезки ткани (выпад %)</label><input type="number" class="f-loss" oninput="calc()" value="0"></div>
             <div><label class="label">Валюта</label>
                 <select class="f-curr" onchange="toggleFabricRate(this); calc()">
                     <option value="KGS">сом</option><option value="USD">$</option><option value="RUB">₽</option>
                 </select>
             </div>
-            <div><label class="label">Цена (м)</label><input type="number" class="f-price" oninput="calc()" value="${data?.price||''}"></div>
-            <div><label class="label">Курс за 1$</label><input type="number" class="f-rate" oninput="calc()" value="${data?.rate||1}" disabled></div>
+            <div><label class="label">Цена (м)</label><input type="number" class="f-price" oninput="calc()"></div>
+            <div><label class="label">Курс за 1$</label><input type="number" class="f-rate" oninput="calc()" value="1" disabled></div>
             <div style="grid-column: span 3;">
                 <span class="price-som-badge f-price-som"></span>
                 <label class="label">Итого на 1 ед:</label>
@@ -357,15 +428,15 @@
 
     function toggleFabricRate(sel) {
         const row = sel.closest('.fabric-row');
-        const rateIn = row.querySelector('.f-rate');
-        rateIn.disabled = (sel.value === 'KGS');
-        if(sel.value === 'KGS') rateIn.value = 1;
+        row.querySelector('.f-rate').disabled = (sel.value === 'KGS');
+        if(sel.value === 'KGS') row.querySelector('.f-rate').value = 1;
+        saveToLocal();
     }
 
-    function addGlue(data = null) {
+    function addGlue() {
         const html = `
         <div class="row-item glue-row">
-            <div style="grid-column: span 6;"><label class="label">Название клеевой</label><input type="text" class="g-name"></div>
+            <div style="grid-column: span 6;"><label class="label">Название клеевой</label><input type="text" class="g-name" oninput="saveToLocal()"></div>
             <div style="grid-column: span 6;"><label class="label">ТИП ЗАКУПКИ</label>
                 <select class="g-mode" onchange="toggleRoll(this); updateGlueLabels(this); calc()">
                     <option value="m">Метр</option><option value="roll">Рулон</option>
@@ -386,20 +457,17 @@
 
     function updateGlueLabels(sel) {
         const row = sel.closest('.glue-row');
-        const priceLabel = row.querySelector('.g-price-label');
-        const useLabel = row.querySelector('.g-use-label');
-        if (sel.value === 'm') { priceLabel.innerText = "Цена за 1 метр (сом)"; useLabel.innerText = "Расход на 1 ед. (см)"; }
-        else { priceLabel.innerText = "Цена за рулон (сом)"; useLabel.innerText = "Расход на 1 ед. (см)"; }
+        row.querySelector('.g-price-label').innerText = sel.value === 'm' ? "Цена за 1 метр (сом)" : "Цена за рулон (сом)";
     }
 
-    function toggleRoll(sel) { sel.closest('.glue-row').querySelector('.g-roll-len').disabled = (sel.value === 'm'); }
+    function toggleRoll(sel) { sel.closest('.glue-row').querySelector('.g-roll-len').disabled = (sel.value === 'm'); saveToLocal(); }
 
     function addAcc() {
         const html = `
         <div class="row-item acc-row">
-            <div style="grid-column: span 6;"><label class="label">Фурнитура</label><input type="text" class="a-name"></div>
+            <div style="grid-column: span 6;"><label class="label">Фурнитура</label><input type="text" class="a-name" oninput="saveToLocal()"></div>
             <div style="grid-column: span 6;"><label class="label">Тип</label>
-                <select class="a-unit a-unit-select" onchange="updateAccLabels(this); calc()">
+                <select class="a-unit" onchange="updateAccLabels(this); calc()">
                     <option value="шт">шт</option>
                     <option value="м">м</option>
                 </select>
@@ -424,14 +492,12 @@
 
     function updateAccLabels(sel) {
         const row = sel.closest('.acc-row');
-        const priceLabel = row.querySelector('.a-price-label');
-        const useLabel = row.querySelector('.a-use-label');
-        if (sel.value === 'шт') { priceLabel.innerText = "Цена за 1 шт (сом)"; useLabel.innerText = "Кол-во (на 1 ед)"; }
-        else { priceLabel.innerText = "Цена за 1 метр (сом)"; useLabel.innerText = "Расход (метры)"; }
+        row.querySelector('.a-price-label').innerText = sel.value === 'шт' ? "Цена за 1 шт (сом)" : "Цена за 1 метр (сом)";
+        saveToLocal();
     }
 
     function calc() {
-        saveToLocal(); // <-- Просто добавь эту строчку в начало своей функции calc
+        saveToLocal();
         const qty = parseFloat(document.getElementById('qty').value) || 0;
         const taxRate = parseFloat(document.getElementById('tax_rate').value);
         const fixedExp = parseFloat(document.getElementById('fixed_exp').value) || 0;
@@ -649,6 +715,14 @@
         });
         const encodedMessage = encodeURIComponent(message);
         window.open(`https://wa.me/?text=${encodedMessage}`, '_blank');
+    }
+
+    // ТА САМАЯ ФУНКЦИЯ ОЧИСТКИ
+    function clearData() {
+        if (confirm("Вы точно хотите удалить все данные и начать новый расчет?")) {
+            localStorage.removeItem('cehovik_data');
+            location.reload();
+        }
     }
 </script>
 </body>
