@@ -289,6 +289,7 @@
                 use: row.querySelector('.f-use').value,
                 loss: row.querySelector('.f-loss').value,
                 curr: row.querySelector('.f-curr').value,
+                rate: row.querySelector('.f-rate').value, // ДОБАВЬТЕ ЭТУ СТРОКУ
                 price: row.querySelector('.f-price').value,
                 dav: row.querySelector('.f-dav').checked
             })),
@@ -327,16 +328,51 @@
 
         // Восстанавливаем ткани
         if (data.fabrics) {
-            document.getElementById('fabric-list').innerHTML = ''; // очистим
+    document.getElementById('fabric-list').innerHTML = '';
+    data.fabrics.forEach(f => {
+        addFabric();
+        const row = document.querySelector('#fabric-list .fabric-row:last-child');
+        row.querySelector('.f-name').value = f.name;
+        row.querySelector('.f-use').value = f.use;
+        row.querySelector('.f-loss').value = f.loss;
+        row.querySelector('.f-curr').value = f.curr;
+        row.querySelector('.f-price').value = f.price;
+        row.querySelector('.f-rate').value = f.rate || 1; // Загружаем курс
+        row.querySelector('.f-dav').checked = f.dav;
+
+        // ИСПРАВЛЕНИЕ БАГА:
+        const rateInput = row.querySelector('.f-rate');
+        if (f.curr !== 'KGS') {
+            rateInput.disabled = false;
+            rateInput.style.opacity = "1";
+        } else {
+            rateInput.disabled = true;
+            rateInput.style.opacity = "0.5";
+        }
+    });
+}
+
+        // Восстанавливаем клеевые
+        // Восстанавливаем ткани
+        if (data.fabrics) {
+            document.getElementById('fabric-list').innerHTML = '';
             data.fabrics.forEach(f => {
                 addFabric();
                 const row = document.querySelector('#fabric-list .fabric-row:last-child');
-                row.querySelector('.f-name').value = f.name;
-                row.querySelector('.f-use').value = f.use;
-                row.querySelector('.f-loss').value = f.loss;
-                row.querySelector('.f-curr').value = f.curr;
-                row.querySelector('.f-price').value = f.price;
-                row.querySelector('.f-dav').checked = f.dav;
+                row.querySelector('.f-name').value = f.name || '';
+                row.querySelector('.f-use').value = f.use || '';
+                row.querySelector('.f-loss').value = f.loss || 0;
+                row.querySelector('.f-curr').value = f.curr || 'KGS';
+                row.querySelector('.f-price').value = f.price || '';
+                row.querySelector('.f-rate').value = f.rate || 1;
+                row.querySelector('.f-dav').checked = f.dav || false;
+
+                // ИСПРАВЛЕНИЕ: Разблокируем поле курса, если валюта не сом
+                const rateInput = row.querySelector('.f-rate');
+                if (f.curr !== 'KGS') {
+                    rateInput.disabled = false;
+                    rateInput.style.opacity = "1";
+                }
             });
         }
 
@@ -346,12 +382,19 @@
             data.glues.forEach(g => {
                 addGlue();
                 const row = document.querySelector('#glue-list .glue-row:last-child');
-                row.querySelector('.g-name').value = g.name;
-                row.querySelector('.g-mode').value = g.mode;
-                row.querySelector('.g-price').value = g.price;
-                row.querySelector('.g-roll-len').value = g.roll;
-                row.querySelector('.f-use-cm').value = g.use;
-                row.querySelector('.g-dav').checked = g.dav;
+                row.querySelector('.g-name').value = g.name || '';
+                row.querySelector('.g-mode').value = g.mode || 'm';
+                row.querySelector('.g-price').value = g.price || '';
+                row.querySelector('.g-roll-len').value = g.roll || '';
+                row.querySelector('.f-use-cm').value = g.use || '';
+                row.querySelector('.g-dav').checked = g.dav || false;
+
+                // Проверка для клеевых (если добавите туда валюту позже)
+                const rateIn = row.querySelector('.g-rate');
+                if (rateIn && g.curr && g.curr !== 'KGS') {
+                    rateIn.disabled = false;
+                    rateIn.style.opacity = "1";
+                }
             });
         }
 
@@ -498,263 +541,257 @@
     }
 
     function calc() {
-        saveToLocal();
-        const qty = parseFloat(document.getElementById('qty').value) || 0;
-        const taxRate = parseFloat(document.getElementById('tax_rate').value);
-        const fixedExp = parseFloat(document.getElementById('fixed_exp').value) || 0;
-        const clPriceVal = parseFloat(document.getElementById('price_cl_val').value) || 0;
-        const clRate = parseFloat(document.getElementById('cl_rate').value) || 1;
-        const clCurr = document.getElementById('cl_curr').value;
-        const mName = document.getElementById('m_name').value || 'Без названия';
+    saveToLocal();
+    const qty = parseFloat(document.getElementById('qty').value) || 0;
+    const taxRate = parseFloat(document.getElementById('tax_rate').value) || 0;
+    const fixedExp = parseFloat(document.getElementById('fixed_exp').value) || 0;
+    const clPriceVal = parseFloat(document.getElementById('price_cl_val').value) || 0;
+    const clRate = parseFloat(document.getElementById('cl_rate').value) || 1;
+    const clCurr = document.getElementById('cl_curr').value;
+    const mName = document.getElementById('m_name').value || 'Без названия';
 
-        let totalFabricsUnit = 0;
-        let totalGluesUnit = 0;
-        let totalAccsUnit = 0;
+    // --- УМНОЕ ПРАВИЛО ВЫВОДА (2 знака или целое) ---
+    const fmt = (val) => val.toLocaleString('ru-RU', {
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 2
+    });
 
-        const now = new Date();
-        document.getElementById('res_date_full').innerText = now.toLocaleString('ru-RU');
-        document.getElementById('res_id').innerText = Math.floor(Math.random() * 900000) + 100000;
-        let fabricConsumHTML = '';
-        let materialsHTML = `
-            <div class="buy-title" style="margin-top:20px; color: #0071E3; border-bottom: 2px solid #0071E3;">3. ДЕТАЛЬНЫЙ РАСХОД МАТЕРИАЛОВ</div>
-            <table style="width:100%; border-collapse: collapse; font-size: 12px; margin-top: 10px; color: white;" id="materials-table">
-                <thead>
-                    <tr style="border-bottom: 2px solid #38383a; text-align: left; color: #86868b;">
-                        <th style="padding: 8px 4px;">Наименование</th>
-                        <th style="padding: 8px 4px; text-align: center;">На 1 ед.</th>
-                        <th style="padding: 8px 4px; text-align: right;">Всего на партию</th>
-                    </tr>
-                </thead>
-                <tbody>
-        `;
-        document.querySelectorAll('.fabric-row').forEach(row => {
-            const name = row.querySelector('.f-name').value || 'Ткань';
-            const p = parseFloat(row.querySelector('.f-price').value) || 0;
-            const r = parseFloat(row.querySelector('.f-rate').value) || 1;
-            const u = parseFloat(row.querySelector('.f-use').value) || 0;
-            const lVal = parseFloat(row.querySelector('.f-loss').value) || 0;
-            const l = 1 + (lVal / 100);
-            const isDav = row.querySelector('.f-dav').checked;
-            const curr = row.querySelector('.f-curr').value;
-            const resBadge = row.querySelector('.f-unit-result');
-            const somBadge = row.querySelector('.f-price-som');
+    let totalFabricsUnit = 0;
+    let totalGluesUnit = 0;
+    let totalAccsUnit = 0;
 
+    const now = new Date();
+    document.getElementById('res_date_full').innerText = now.toLocaleString('ru-RU');
+    document.getElementById('res_id').innerText = Math.floor(Math.random() * 900000) + 100000;
 
-             // Используем Number() или parseFloat(), чтобы убрать лишние знаки после запятой,
-// которые генерирует JavaScript, сохранив реальную точность.
+    let fabricConsumHTML = '';
+    let materialsHTML = `
+        <div class="buy-title" style="margin-top:20px; color: #0071E3; border-bottom: 2px solid #0071E3;">3. ДЕТАЛЬНЫЙ РАСХОД МАТЕРИАЛОВ</div>
+        <table style="width:100%; border-collapse: collapse; font-size: 12px; margin-top: 10px; color: white;" id="materials-table">
+            <thead>
+                <tr style="border-bottom: 2px solid #38383a; text-align: left; color: #86868b;">
+                    <th style="padding: 8px 4px;">Наименование</th>
+                    <th style="padding: 8px 4px; text-align: center;">На 1 ед.</th>
+                    <th style="padding: 8px 4px; text-align: right;">Всего на партию</th>
+                </tr>
+            </thead>
+            <tbody>
+    `;
 
-if (curr !== 'KGS' && p > 0 && r > 1) {
-    // Ограничиваем до 10 знаков, чтобы убить "хвост" 0000001,
-    // а parseFloat уберет лишние нули в конце
-    somBadge.innerText = parseFloat((p * r).toFixed(10)) + ' сом/м';
-} else {
-    somBadge.innerText = '';
-}
+    document.querySelectorAll('.fabric-row').forEach(row => {
+        const name = row.querySelector('.f-name').value || 'Ткань';
+        const p = parseFloat(row.querySelector('.f-price').value) || 0;
+        const r = parseFloat(row.querySelector('.f-rate').value) || 1;
+        const u = parseFloat(row.querySelector('.f-use').value) || 0;
+        const lVal = parseFloat(row.querySelector('.f-loss').value) || 0;
+        const l = 1 + (lVal / 100);
+        const isDav = row.querySelector('.f-dav').checked;
+        const curr = row.querySelector('.f-curr').value;
 
-const costUnit = p * r * u * l;
+        const somBadge = row.querySelector('.f-price-som');
+        const resBadge = row.querySelector('.f-unit-result');
 
-// Применяем ту же логику для итогов
-resBadge.innerText = parseFloat(costUnit.toFixed(10)) + ' сом';
+        if (curr !== 'KGS' && p > 0 && r > 1) {
+            somBadge.innerText = fmt(p * r) + ' сом/м';
+        } else {
+            somBadge.innerText = '';
+        }
 
-if (u > 0) {
+        const costUnit = p * r * u * l;
+        resBadge.innerText = fmt(costUnit) + ' сом';
+
+        if (u > 0) {
     if(!isDav) totalFabricsUnit += costUnit;
+    const consumption = u * l;
+    const totalConsumption = consumption * qty;
 
-    // Для расхода (убираем хвосты, оставляем точность)
-    const consumption = parseFloat((u * l).toFixed(10));
-    const totalConsumption = parseFloat((u * l * qty).toFixed(10));
+    // Готовим текст про закуп (цена + валюта + курс)
+    let buyInfo = `${p} ${row.querySelector('.f-curr').value}`;
+    if (row.querySelector('.f-curr').value !== 'KGS') {
+        buyInfo += ` (курс: ${r})`;
+    }
 
-    fabricConsumHTML += `<div class="sum-item"><span>${name} (расход):</span><b style="color:var(--primary)">${consumption} м / ед</b></div>`;
+    fabricConsumHTML += `<div class="sum-item"><span>${name} (расход):</span><b style="color:var(--primary)">${fmt(consumption)} м / ед</b></div>`;
 
     materialsHTML += `
         <tr style="border-bottom: 1px solid #2c2c2e;">
             <td style="padding: 10px 4px;">
                 <b style="color:#fff;">${name}</b>${isDav ? ' <i style="color:#86868b;">(Дав.)</i>' : ''}
+                <br><span style="font-size:10px; color:#86868b;">Закуп: ${buyInfo}</span>
                 <br><span style="font-size:10px; color:#86868b;">Брак: ${lVal}%</span>
             </td>
-            <td style="padding: 10px 4px; text-align: center; color:#ccc;">${consumption} м</td>
-            <td style="padding: 10px 4px; text-align: right; color:#0071E3; font-weight:700;">${totalConsumption} м</td>
+            <td style="padding: 10px 4px; text-align: center; color:#ccc;">${fmt(consumption)} м</td>
+            <td style="padding: 10px 4px; text-align: right; color:#0071E3; font-weight:700;">${fmt(totalConsumption)} м</td>
         </tr>`;
 }
-        });
+    });
 
-        document.querySelectorAll('.glue-row').forEach(row => {
-            const name = row.querySelector('.g-name').value || 'Клеевая';
-            const mode = row.querySelector('.g-mode').value;
-            const p = parseFloat(row.querySelector('.g-price').value) || 0;
-            const rL = parseFloat(row.querySelector('.g-roll-len').value) || 1;
-            const u = parseFloat(row.querySelector('.f-use-cm').value) || 0;
-            const isDav = row.querySelector('.g-dav').checked;
-            const resBadge = row.querySelector('.g-unit-result');
-            const priceM = (mode === 'roll') ? (p/rL) : p;
-            const finalUnitCost = (priceM * (u/100));
-            resBadge.innerText = finalUnitCost.toFixed(2) + ' сом';
-            if (u > 0) {
-                if(!isDav) totalGluesUnit += finalUnitCost;
-                materialsHTML += `
-                    <tr style="border-bottom: 1px solid #2c2c2e;">
-                        <td style="padding: 10px 4px;">${name}${isDav ? ' (Дав.)' : ''}</td>
-                        <td style="padding: 10px 4px; text-align: center; color:#ccc;">${u} см</td>
-                        <td style="padding: 10px 4px; text-align: right; font-weight:700;">${((u/100) * qty).toFixed(1)} м</td>
-                    </tr>`;
-            }
-        });
+    document.querySelectorAll('.glue-row').forEach(row => {
+        const name = row.querySelector('.g-name').value || 'Клеевая';
+        const mode = row.querySelector('.g-mode').value;
+        const p = parseFloat(row.querySelector('.g-price').value) || 0;
+        const rL = parseFloat(row.querySelector('.g-roll-len').value) || 1;
+        const u = parseFloat(row.querySelector('.f-use-cm').value) || 0;
+        const isDav = row.querySelector('.g-dav').checked;
+        const resBadge = row.querySelector('.g-unit-result');
 
-        document.querySelectorAll('.acc-row').forEach(row => {
-            const name = row.querySelector('.a-name').value || 'Фурнитура';
-            const p = parseFloat(row.querySelector('.a-price').value) || 0;
-            const u = parseFloat(row.querySelector('.a-use').value) || 0;
-            const unit = row.querySelector('.a-unit').value;
-            const isDav = row.querySelector('.a-dav').checked;
-            const resBadge = row.querySelector('.a-unit-result');
-            const costUnit = p * u;
-            resBadge.innerText = costUnit.toFixed(2) + ' сом';
-            if (u > 0) {
-                if(!isDav) totalAccsUnit += costUnit;
-                materialsHTML += `
-                    <tr style="border-bottom: 1px solid #2c2c2e;">
-                        <td style="padding: 10px 4px;">${name}${isDav ? ' (Дав.)' : ''}</td>
-                        <td style="padding: 10px 4px; text-align: center; color:#ccc;">${u} ${unit}</td>
-                        <td style="padding: 10px 4px; text-align: right; font-weight:700;">${(u * qty).toFixed(0)} ${unit}</td>
-                    </tr>`;
-            }
-        });
+        const priceM = (mode === 'roll') ? (p/rL) : p;
+        const finalUnitCost = (priceM * (u/100));
+        resBadge.innerText = fmt(finalUnitCost) + ' сом';
 
-        materialsHTML += `</tbody></table>`;
-        const fotUnit = Array.from(document.querySelectorAll('.fot-in')).reduce((s, i) => s + (parseFloat(i.value) || 0), 0);
-        document.getElementById('fot-total-badge').innerText = fotUnit.toFixed(0) + ' сом';
-        const totalMatUnit = totalFabricsUnit + totalGluesUnit + totalAccsUnit;
-        const unitCost = totalMatUnit + fotUnit + fixedExp;
+        if (u > 0) {
+            if(!isDav) totalGluesUnit += finalUnitCost;
+            materialsHTML += `
+                <tr style="border-bottom: 1px solid #2c2c2e;">
+                    <td style="padding: 10px 4px;">${name}${isDav ? ' (Дав.)' : ''}</td>
+                    <td style="padding: 10px 4px; text-align: center; color:#ccc;">${fmt(u)} см</td>
+                    <td style="padding: 10px 4px; text-align: right; font-weight:700;">${fmt((u/100) * qty)} м</td>
+                </tr>`;
+        }
+    });
 
+    document.querySelectorAll('.acc-row').forEach(row => {
+        const name = row.querySelector('.a-name').value || 'Фурнитура';
+        const p = parseFloat(row.querySelector('.a-price').value) || 0;
+        const u = parseFloat(row.querySelector('.a-use').value) || 0;
+        const unit = row.querySelector('.a-unit').value;
+        const isDav = row.querySelector('.a-dav').checked;
+        const resBadge = row.querySelector('.a-unit-result');
 
-        const unitCostRounded = parseFloat(unitCost.toFixed(10));
-        const totalExp = parseFloat((unitCostRounded * qty).toFixed(10));
+        const costUnit = p * u;
+        resBadge.innerText = fmt(costUnit) + ' сом';
 
-        const revenueSom = clPriceVal * clRate * qty;
-        const tax = revenueSom * taxRate;
-        const profit = revenueSom - totalExp - tax;
+        if (u > 0) {
+            if(!isDav) totalAccsUnit += costUnit;
+            materialsHTML += `
+                <tr style="border-bottom: 1px solid #2c2c2e;">
+                    <td style="padding: 10px 4px;">${name}${isDav ? ' (Дав.)' : ''}</td>
+                    <td style="padding: 10px 4px; text-align: center; color:#ccc;">${fmt(u)} ${unit}</td>
+                    <td style="padding: 10px 4px; text-align: right; font-weight:700;">${fmt(u * qty)} ${unit}</td>
+                </tr>`;
+        }
+    });
 
-        // Обновление данных в разделе "2. Затраты на партию"
-        document.getElementById('res_fabric_consumption_list').innerHTML = fabricConsumHTML;
+    materialsHTML += `</tbody></table>`;
+    const fotUnit = Array.from(document.querySelectorAll('.fot-in')).reduce((s, i) => s + (parseFloat(i.value) || 0), 0);
+    document.getElementById('fot-total-badge').innerText = fmt(fotUnit) + ' сом';
 
+    // Сначала считаем точную сумму
+    const unitCostRaw = totalFabricsUnit + totalGluesUnit + totalAccsUnit + fotUnit + fixedExp;
 
-        // Ткани и подклад
-document.getElementById('res_sum_fabrics').innerHTML =
-    `<span style="font-weight:400; color:#86868b; margin-right:10px;">(${parseFloat(totalFabricsUnit.toFixed(10))} сом/ед)</span>` +
-    `<span>${parseFloat((totalFabricsUnit * qty).toFixed(10)).toLocaleString()} сом</span>`;
+    // ОКРУГЛЯЕМ себестоимость до 2 знаков сразу (чтобы расчет был как на калькуляторе)
+    const unitCost = Math.round(unitCostRaw * 100) / 100;
 
-// Клеевые материалы
-document.getElementById('res_sum_glues').innerHTML =
-    `<span style="font-weight:400; color:#86868b; margin-right:10px;">(${parseFloat(totalGluesUnit.toFixed(10))} сом/ед)</span>` +
-    `<span>${parseFloat((totalGluesUnit * qty).toFixed(10)).toLocaleString()} сом</span>`;
+    // Теперь умножаем уже округленную цену на количество
+    const totalExp = unitCost * qty;
 
-// Вся фурнитура
-document.getElementById('res_sum_accs').innerHTML =
-    `<span style="font-weight:400; color:#86868b; margin-right:10px;">(${parseFloat(totalAccsUnit.toFixed(10))} сом/ед)</span>` +
-    `<span>${parseFloat((totalAccsUnit * qty).toFixed(10)).toLocaleString()} сом</span>`;
+    // Округляем выручку тоже, чтобы не было хвостов
+    const revenueSom = Math.round((clPriceVal * clRate * qty) * 100) / 100;
+    const tax = revenueSom * taxRate;
+    const profit = revenueSom - totalExp - tax;
 
-// Работа (ФОТ)
-document.getElementById('res_sum_fot').innerHTML =
-    `<span style="font-weight:400; color:#86868b; margin-right:10px;">(${parseFloat(fotUnit.toFixed(10))} сом/ед)</span>` +
-    `<span>${parseFloat((fotUnit * qty).toFixed(10)).toLocaleString()} сом</span>`;
-
-
-document.getElementById('res_sum_fixed').innerHTML =
-    `<span style="font-weight:400; color:#86868b; margin-right:10px;">(${parseFloat(fixedExp.toFixed(10))} сом/ед)</span>` +
-    `<span>${parseFloat((fixedExp * qty).toFixed(10)).toLocaleString()} сом</span>`;
-
-        const priceInput = document.getElementById('price_cl_val');
-        if (clPriceVal > 0 && (clPriceVal * clRate) <= unitCost) { priceInput.classList.add('loss-warning'); } else { priceInput.classList.remove('loss-warning'); }
-
-        document.getElementById('res_m_name').innerText = mName;
+    // ВЫВОД В БЛОКИ
+    document.getElementById('res_m_name').innerText = mName;
     document.getElementById('res_qty').innerText = qty + ' шт';
-
-
-    // ВЫВОД: Используем точные значения без Math.round
-    document.getElementById('monitor_cost').innerText = unitCostRounded.toLocaleString('ru-RU') + ' сом';
-    document.getElementById('res_unit_cost').innerText = unitCostRounded.toLocaleString('ru-RU') + ' сом';
-    document.getElementById('res_total_exp').innerText = totalExp.toLocaleString('ru-RU') + ' сом';
-
-    // Исправлено: заменяем Math.round на точный вывод через parseFloat
-    document.getElementById('res_revenue').innerText = parseFloat(revenueSom.toFixed(10)).toLocaleString('ru-RU') + ' сом';
-    document.getElementById('res_tax').innerText = parseFloat(tax.toFixed(10)).toLocaleString('ru-RU') + ' сом';
-
-    // Исправлено: точная выручка в валюте клиента
-    let subVal = parseFloat((clPriceVal * qty).toFixed(10));
-    let subText = `Выручка: ${subVal.toLocaleString('ru-RU')} ${clCurr}`;
-    if(clCurr !== 'KGS') {
-        let revSomVal = parseFloat(revenueSom.toFixed(10));
-        subText += ` | Итого в сомах: ${revSomVal.toLocaleString('ru-RU')} сом`;
-    }
-    document.getElementById('cl_price_sub').innerText = clPriceVal > 0 ? subText : "";
+    document.getElementById('monitor_cost').innerText = fmt(unitCost) + ' сом';
+    document.getElementById('res_unit_cost').innerText = fmt(unitCost) + ' сом';
+    document.getElementById('res_total_exp').innerText = fmt(totalExp) + ' сом';
+    document.getElementById('res_revenue').innerText = fmt(revenueSom) + ' сом';
+    document.getElementById('res_tax').innerText = fmt(tax) + ' сом';
     document.getElementById('res_rate_val').innerText = `1 ${clCurr} = ${clRate} сом`;
 
-    // Исправлено: точная чистая прибыль
     const profitEl = document.getElementById('res_profit');
-    let profitVal = parseFloat(profit.toFixed(10));
-    profitEl.innerText = profitVal.toLocaleString('ru-RU') + ' сом';
-
+    // Используем спец. формат: всегда 2 знака после запятой
+    profitEl.innerText = profit.toLocaleString('ru-RU', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' сом';
     profitEl.style.color = profit < 0 ? 'var(--danger)' : 'var(--success)';
+
+    // Затраты на партию (Блок 2)
+    const setRes = (id, uVal) => {
+        // Округляем значение за единицу
+        const unitV = Math.round(uVal * 100) / 100;
+        // Считаем итог от округленного значения
+        const totalV = unitV * qty;
+
+        document.getElementById(id).innerHTML =
+        `<span style="font-weight:400; color:#86868b; margin-right:10px;">(${fmt(unitV)} сом/ед)</span>` +
+        `<span>${fmt(totalV)} сом</span>`;
+    };
+    setRes('res_sum_fabrics', totalFabricsUnit);
+    setRes('res_sum_glues', totalGluesUnit);
+    setRes('res_sum_accs', totalAccsUnit);
+    setRes('res_sum_fot', fotUnit);
+    setRes('res_sum_fixed', fixedExp);
+
+    // Подсказка под ценой
+    let subText = `Выручка: ${fmt(clPriceVal * qty)} ${clCurr}`;
+    if(clCurr !== 'KGS') subText += ` | В сомах: ${fmt(revenueSom)} сом`;
+    document.getElementById('cl_price_sub').innerText = clPriceVal > 0 ? subText : "";
+
+    document.getElementById('res_fabric_consumption_list').innerHTML = fabricConsumHTML;
     document.getElementById('res_detailed_materials').innerHTML = materialsHTML;
 }
 
 
     function shareWhatsApp() {
-        const mName = document.getElementById('m_name').value || 'Без названия';
-        const qty = document.getElementById('qty').value || 0;
-        const unitCost = document.getElementById('res_unit_cost').innerText;
-        const totalExp = document.getElementById('res_total_exp').innerText;
-        const revenue = document.getElementById('res_revenue').innerText;
-        const tax = document.getElementById('res_tax').innerText;
-        const profit = document.getElementById('res_profit').innerText;
-        const fixedExpUnit = document.getElementById('fixed_exp').value || 0;
-        const date = document.getElementById('res_date_full').innerText;
-        let message = `ОТЧЕТ: ${mName.toUpperCase()}\n`;
-        message += `Дата: ${date}\n`;
-        message += `----------------------------\n`;
-        message += `Партия: ${qty} шт.\n`;
-        message += `Себестоимость 1 ед: ${unitCost}\n`;
-        message += `Общие расходы: ${totalExp}\n`;
-        message += `Выручка: ${revenue}\n`;
-        message += `Налог: ${tax}\n`;
-        message += `ЧИСТАЯ ПРИБЫЛЬ: ${profit}\n`;
-        message += `----------------------------\n`;
-        message += `ДЕТАЛИЗАЦИЯ (на 1 ед):\n`;
-        message += `• Работа (ФОТ): ${document.getElementById('fot-total-badge').innerText}\n`;
-        message += `• Расходы цеха: ${fixedExpUnit} сом\n`;
-        document.querySelectorAll('.fabric-row').forEach(row => {
-            const name = row.querySelector('.f-name').value || 'Ткань';
-            const u = parseFloat(row.querySelector('.f-use').value) || 0;
-            const l = 1 + (parseFloat(row.querySelector('.f-loss').value) || 0)/100;
-            if (u > 0) message += `• Расход ${name}: ${(u * l).toFixed(2)} м/ед\n`;
-        });
-        message += `----------------------------\n`;
-        message += `СПЕЦИФИКАЦИЯ МАТЕРИАЛОВ (на партию):\n`;
-        document.querySelectorAll('.fabric-row').forEach(row => {
-            const name = row.querySelector('.f-name').value || 'Ткань';
-            const u = parseFloat(row.querySelector('.f-use').value) || 0;
-            const l = 1 + (parseFloat(row.querySelector('.f-loss').value) || 0)/100;
-            const p = row.querySelector('.f-price').value || 0;
-            const curr = row.querySelector('.f-curr').value;
-            const isDav = row.querySelector('.f-dav').checked;
-            if (u > 0) message += `• ${name}: ${(u * l * qty).toFixed(2)} м. (Цена: ${p} ${curr}${isDav ? ' - Давальч.' : ''})\n`;
-        });
-        document.querySelectorAll('.glue-row').forEach(row => {
-            const name = row.querySelector('.g-name').value || 'Клеевая';
-            const u = parseFloat(row.querySelector('.f-use-cm').value) || 0;
-            const isDav = row.querySelector('.g-dav').checked;
-            if (u > 0) message += `• ${name}: ${((u/100) * qty).toFixed(2)} м.${isDav ? ' - Давальч.' : ''}\n`;
-        });
-        document.querySelectorAll('.acc-row').forEach(row => {
-            const name = row.querySelector('.a-name').value || 'Фурнитура';
-            const u = parseFloat(row.querySelector('.a-use').value) || 0;
-            const unit = row.querySelector('.a-unit').value;
-            const p = row.querySelector('.a-price').value || 0;
-            const isDav = row.querySelector('.a-dav').checked;
-            if (u > 0) message += `• ${name}: ${(u * qty).toFixed(0)} ${unit}. (Цена: ${p} сом${isDav ? ' - Давальч.' : ''})\n`;
-        });
-        const encodedMessage = encodeURIComponent(message);
-        window.open(`https://wa.me/?text=${encodedMessage}`, '_blank');
-    }
+    const mName = (document.getElementById('m_name').value || 'Без названия').toUpperCase();
+    const qty = document.getElementById('qty').value || 0;
+    const date = document.getElementById('res_date_full').innerText;
+    const resId = document.getElementById('res_id').innerText;
+
+    // Берем готовые красивые значения прямо с экрана (уже с округлением)
+    const unitCost = document.getElementById('res_unit_cost').innerText;
+    const totalExp = document.getElementById('res_total_exp').innerText;
+    const revenue = document.getElementById('res_revenue').innerText;
+    const tax = document.getElementById('res_tax').innerText;
+    const profit = document.getElementById('res_profit').innerText;
+
+    let message = `📝 *ОТЧЕТ ПО ЗАКАЗУ: ${mName}*\n`;
+    message += `🆔 ID: ${resId} | 📅 ${date}\n`;
+    message += `------------------------------------------\n`;
+    message += `📊 *ОСНОВНЫЕ ПОКАЗАТЕЛИ*\n`;
+    message += `• Объем партии: ${qty} шт.\n`;
+    message += `• Себестоимость ед.: ${unitCost}\n`;
+    message += `• Чистая прибыль: *${profit}*\n`;
+    message += `------------------------------------------\n`;
+
+    message += `💰 *1. ФИНАНСОВЫЕ ПОКАЗАТЕЛИ*\n`;
+    message += `• Общая выручка: ${revenue}\n`;
+    message += `• Общие расходы: ${totalExp}\n`;
+    message += `• Налог (0.25%): ${tax}\n`;
+    message += `------------------------------------------\n`;
+
+    message += `🏗 *2. ЗАТРАТЫ НА ПАРТИЮ*\n`;
+
+    // Функция для вытягивания текста из строк затрат
+    const getRowData = (id) => document.getElementById(id).innerText.replace(/\s+/g, ' ');
+
+    message += `• Ткани/Подклад: ${getRowData('res_sum_fabrics')}\n`;
+    message += `• Клеевые: ${getRowData('res_sum_glues')}\n`;
+    message += `• Фурнитура: ${getRowData('res_sum_accs')}\n`;
+    message += `• Работа (ФОТ): ${getRowData('res_sum_fot')}\n`;
+    message += `• Аренда/Цех: ${getRowData('res_sum_fixed')}\n`;
+    message += `------------------------------------------\n`;
+
+    message += `✂️ *3. ДЕТАЛЬНЫЙ РАСХОД МАТЕРИАЛОВ*\n`;
+
+    // Собираем данные из таблицы материалов
+    const tableRows = document.querySelectorAll('#materials-table tbody tr');
+    tableRows.forEach(row => {
+        const cols = row.querySelectorAll('td');
+        if (cols.length >= 3) {
+            const name = cols[0].innerText.split('\n')[0].trim(); // Только название
+            const perUnit = cols[1].innerText.trim();
+            const total = cols[2].innerText.trim();
+            message += `• ${name}: ${perUnit} (Всего: ${total})\n`;
+        }
+    });
+
+    message += `------------------------------------------\n`;
+    message += `🚀 _Создано в ЦЕХОВИК ERP_`;
+
+    const encodedMessage = encodeURIComponent(message);
+    window.open(`https://wa.me/?text=${encodedMessage}`, '_blank');
+}
 
     // ТА САМАЯ ФУНКЦИЯ ОЧИСТКИ
     function clearData() {
