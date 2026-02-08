@@ -107,7 +107,7 @@
         <div class="author-info">
     <h3><span style="font-size:20px;">💡</span> Полезные советы:</h3>
 
-    <p>Система <b>«ЦЕХОВИК ERP»</b> предоставляется бесплатно для поддержки швейного бизнеса.</p>
+    <p>Система <b>«ЦЕХОВИК ERP»</b> предоставляется бесплатно для поддержки швейного бизнеса. Полный цикл себестоимости: автоматический расчет стоимости одной единицы изделия, включая ткани, подклад, клеевые материалы, фурнитуру и работу персанала.</p>
 
     <div class="info-card">
         <b>Валюта:</b> Если вы покупаете ткань в долларах, указывайте курс, по которому вы её фактически приобрели.
@@ -191,7 +191,7 @@
                 <option value="0">0%</option>
                 <option value="0.04">4%</option>
             </select>
-            <label class="label">Расходы цеха (на 1 ед.)</label>
+            <label class="label">Расходы цеха (Аренда, свет и.тд) на 1 ед.</label>
             <input type="number" id="fixed_exp" oninput="calc()">
         </div>
         <button class="btn-next" onclick="goToStep(7)">Далее: Цена продажи</button>
@@ -253,6 +253,7 @@
         <div class="sum-item"><span>Клеевые материалы:</span><b id="res_sum_glues">0 сом</b></div>
         <div class="sum-item"><span>Вся фурнитура:</span><b id="res_sum_accs">0 сом</b></div>
         <div class="sum-item"><span>Работа (ФОТ):</span><b id="res_sum_fot">0 сом</b></div>
+        <div class="sum-item"><span>Расходы цеха (Аренда, свет и.тд):</span><b id="res_sum_fixed">0 сом</b></div>
 
         <div id="res_detailed_materials"></div>
     </div>
@@ -538,26 +539,42 @@
             const resBadge = row.querySelector('.f-unit-result');
             const somBadge = row.querySelector('.f-price-som');
 
-            if (curr !== 'KGS' && p > 0 && r > 1) {
-                somBadge.innerText = (p * r).toFixed(1) + ' сом/м';
-            } else {
-                somBadge.innerText = '';
-            }
-            const costUnit = p * r * u * l;
-            resBadge.innerText = costUnit.toFixed(2) + ' сом';
-            if (u > 0) {
-                if(!isDav) totalFabricsUnit += costUnit;
-                fabricConsumHTML += `<div class="sum-item"><span>${name} (расход):</span><b style="color:var(--primary)">${(u * l).toFixed(2)} м / ед</b></div>`;
-                materialsHTML += `
-                    <tr style="border-bottom: 1px solid #2c2c2e;">
-                        <td style="padding: 10px 4px;">
-                            <b style="color:#fff;">${name}</b>${isDav ? ' <i style="color:#86868b;">(Дав.)</i>' : ''}
-                            <br><span style="font-size:10px; color:#86868b;">Брак: ${lVal}%</span>
-                        </td>
-                        <td style="padding: 10px 4px; text-align: center; color:#ccc;">${(u * l).toFixed(2)} м</td>
-                        <td style="padding: 10px 4px; text-align: right; color:#0071E3; font-weight:700;">${(u * l * qty).toFixed(1)} м</td>
-                    </tr>`;
-            }
+
+             // Используем Number() или parseFloat(), чтобы убрать лишние знаки после запятой,
+// которые генерирует JavaScript, сохранив реальную точность.
+
+if (curr !== 'KGS' && p > 0 && r > 1) {
+    // Ограничиваем до 10 знаков, чтобы убить "хвост" 0000001,
+    // а parseFloat уберет лишние нули в конце
+    somBadge.innerText = parseFloat((p * r).toFixed(10)) + ' сом/м';
+} else {
+    somBadge.innerText = '';
+}
+
+const costUnit = p * r * u * l;
+
+// Применяем ту же логику для итогов
+resBadge.innerText = parseFloat(costUnit.toFixed(10)) + ' сом';
+
+if (u > 0) {
+    if(!isDav) totalFabricsUnit += costUnit;
+
+    // Для расхода (убираем хвосты, оставляем точность)
+    const consumption = parseFloat((u * l).toFixed(10));
+    const totalConsumption = parseFloat((u * l * qty).toFixed(10));
+
+    fabricConsumHTML += `<div class="sum-item"><span>${name} (расход):</span><b style="color:var(--primary)">${consumption} м / ед</b></div>`;
+
+    materialsHTML += `
+        <tr style="border-bottom: 1px solid #2c2c2e;">
+            <td style="padding: 10px 4px;">
+                <b style="color:#fff;">${name}</b>${isDav ? ' <i style="color:#86868b;">(Дав.)</i>' : ''}
+                <br><span style="font-size:10px; color:#86868b;">Брак: ${lVal}%</span>
+            </td>
+            <td style="padding: 10px 4px; text-align: center; color:#ccc;">${consumption} м</td>
+            <td style="padding: 10px 4px; text-align: right; color:#0071E3; font-weight:700;">${totalConsumption} м</td>
+        </tr>`;
+}
         });
 
         document.querySelectorAll('.glue-row').forEach(row => {
@@ -608,10 +625,9 @@
         const totalMatUnit = totalFabricsUnit + totalGluesUnit + totalAccsUnit;
         const unitCost = totalMatUnit + fotUnit + fixedExp;
 
-        // ПОПРАВКА ТУТ: Берем округленную себестоимость (473.5)
-        const unitCostRounded = Math.round(unitCost * 10) / 10;
-        // И умножаем её на количество (получаем ровно 473 500)
-        const totalExp = unitCostRounded * qty;
+
+        const unitCostRounded = parseFloat(unitCost.toFixed(10));
+        const totalExp = parseFloat((unitCostRounded * qty).toFixed(10));
 
         const revenueSom = clPriceVal * clRate * qty;
         const tax = revenueSom * taxRate;
@@ -620,25 +636,31 @@
         // Обновление данных в разделе "2. Затраты на партию"
         document.getElementById('res_fabric_consumption_list').innerHTML = fabricConsumHTML;
 
+
         // Ткани и подклад
-        document.getElementById('res_sum_fabrics').innerHTML =
-            `<span style="font-weight:400; color:#86868b; margin-right:10px;">(${(Math.round(totalFabricsUnit * 10) / 10)} сом/ед)</span>` +
-            `<span>${(Math.round(totalFabricsUnit * qty * 10) / 10).toLocaleString()} сом</span>`;
+document.getElementById('res_sum_fabrics').innerHTML =
+    `<span style="font-weight:400; color:#86868b; margin-right:10px;">(${parseFloat(totalFabricsUnit.toFixed(10))} сом/ед)</span>` +
+    `<span>${parseFloat((totalFabricsUnit * qty).toFixed(10)).toLocaleString()} сом</span>`;
 
-        // Клеевые материалы
-        document.getElementById('res_sum_glues').innerHTML =
-            `<span style="font-weight:400; color:#86868b; margin-right:10px;">(${(Math.round(totalGluesUnit * 10) / 10)} сом/ед)</span>` +
-            `<span>${(Math.round(totalGluesUnit * qty * 10) / 10).toLocaleString()} сом</span>`;
+// Клеевые материалы
+document.getElementById('res_sum_glues').innerHTML =
+    `<span style="font-weight:400; color:#86868b; margin-right:10px;">(${parseFloat(totalGluesUnit.toFixed(10))} сом/ед)</span>` +
+    `<span>${parseFloat((totalGluesUnit * qty).toFixed(10)).toLocaleString()} сом</span>`;
 
-        // Вся фурнитура
-        document.getElementById('res_sum_accs').innerHTML =
-            `<span style="font-weight:400; color:#86868b; margin-right:10px;">(${(Math.round(totalAccsUnit * 10) / 10)} сом/ед)</span>` +
-            `<span>${(Math.round(totalAccsUnit * qty * 10) / 10).toLocaleString()} сом</span>`;
+// Вся фурнитура
+document.getElementById('res_sum_accs').innerHTML =
+    `<span style="font-weight:400; color:#86868b; margin-right:10px;">(${parseFloat(totalAccsUnit.toFixed(10))} сом/ед)</span>` +
+    `<span>${parseFloat((totalAccsUnit * qty).toFixed(10)).toLocaleString()} сом</span>`;
 
-        // Работа (ФОТ)
-        document.getElementById('res_sum_fot').innerHTML =
-            `<span style="font-weight:400; color:#86868b; margin-right:10px;">(${(Math.round(fotUnit * 10) / 10)} сом/ед)</span>` +
-            `<span>${(Math.round(fotUnit * qty * 10) / 10).toLocaleString()} сом</span>`;
+// Работа (ФОТ)
+document.getElementById('res_sum_fot').innerHTML =
+    `<span style="font-weight:400; color:#86868b; margin-right:10px;">(${parseFloat(fotUnit.toFixed(10))} сом/ед)</span>` +
+    `<span>${parseFloat((fotUnit * qty).toFixed(10)).toLocaleString()} сом</span>`;
+
+
+document.getElementById('res_sum_fixed').innerHTML =
+    `<span style="font-weight:400; color:#86868b; margin-right:10px;">(${parseFloat(fixedExp.toFixed(10))} сом/ед)</span>` +
+    `<span>${parseFloat((fixedExp * qty).toFixed(10)).toLocaleString()} сом</span>`;
 
         const priceInput = document.getElementById('price_cl_val');
         if (clPriceVal > 0 && (clPriceVal * clRate) <= unitCost) { priceInput.classList.add('loss-warning'); } else { priceInput.classList.remove('loss-warning'); }
@@ -646,26 +668,31 @@
         document.getElementById('res_m_name').innerText = mName;
     document.getElementById('res_qty').innerText = qty + ' шт';
 
-    // ВЫВОД: Используем уже посчитанные точные значения
-    document.getElementById('monitor_cost').innerText = unitCostRounded.toLocaleString() + ' сом';
-    document.getElementById('res_unit_cost').innerText = unitCostRounded.toLocaleString() + ' сом';
-    document.getElementById('res_total_exp').innerText = totalExp.toLocaleString() + ' сом';
 
-    document.getElementById('res_revenue').innerText = (Math.round(revenueSom * 10) / 10).toLocaleString() + ' сом';
-    document.getElementById('res_tax').innerText = (Math.round(tax * 10) / 10).toLocaleString() + ' сом';
+    // ВЫВОД: Используем точные значения без Math.round
+    document.getElementById('monitor_cost').innerText = unitCostRounded.toLocaleString('ru-RU') + ' сом';
+    document.getElementById('res_unit_cost').innerText = unitCostRounded.toLocaleString('ru-RU') + ' сом';
+    document.getElementById('res_total_exp').innerText = totalExp.toLocaleString('ru-RU') + ' сом';
 
-    let subVal = Math.round((clPriceVal * qty) * 10) / 10;
-    let subText = `Выручка: ${subVal.toLocaleString()} ${clCurr}`;
+    // Исправлено: заменяем Math.round на точный вывод через parseFloat
+    document.getElementById('res_revenue').innerText = parseFloat(revenueSom.toFixed(10)).toLocaleString('ru-RU') + ' сом';
+    document.getElementById('res_tax').innerText = parseFloat(tax.toFixed(10)).toLocaleString('ru-RU') + ' сом';
+
+    // Исправлено: точная выручка в валюте клиента
+    let subVal = parseFloat((clPriceVal * qty).toFixed(10));
+    let subText = `Выручка: ${subVal.toLocaleString('ru-RU')} ${clCurr}`;
     if(clCurr !== 'KGS') {
-        let revSomVal = Math.round(revenueSom * 10) / 10;
-        subText += ` | Итого в сомах: ${revSomVal.toLocaleString()} сом`;
+        let revSomVal = parseFloat(revenueSom.toFixed(10));
+        subText += ` | Итого в сомах: ${revSomVal.toLocaleString('ru-RU')} сом`;
     }
     document.getElementById('cl_price_sub').innerText = clPriceVal > 0 ? subText : "";
     document.getElementById('res_rate_val').innerText = `1 ${clCurr} = ${clRate} сом`;
 
+    // Исправлено: точная чистая прибыль
     const profitEl = document.getElementById('res_profit');
-    let profitVal = Math.round(profit * 10) / 10;
-    profitEl.innerText = profitVal.toLocaleString() + ' сом';
+    let profitVal = parseFloat(profit.toFixed(10));
+    profitEl.innerText = profitVal.toLocaleString('ru-RU') + ' сом';
+
     profitEl.style.color = profit < 0 ? 'var(--danger)' : 'var(--success)';
     document.getElementById('res_detailed_materials').innerHTML = materialsHTML;
 }
