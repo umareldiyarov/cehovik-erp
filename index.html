@@ -1,834 +1,1279 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-
-    <title>ЦЕХОВИК ERP</title>
-
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="ЦЕХОВИК">
-
-    <meta name="theme-color" content="#FFFFFF">
-    <meta name="mobile-web-app-capable" content="yes">
-
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-
-    <link rel="apple-touch-icon" href="https://img.icons8.com/fluency/256/sewing-machine.png">
-    <link rel="icon" href="https://img.icons8.com/fluency/256/sewing-machine.png">
-
-    <style>
-        :root {
-            --primary: #0071E3; --bg: #F5F5F7; --card: #FFFFFF; --text: #1D1D1F;
-            --secondary: #86868B; --danger: #FF453A; --success: #30D158; --border: #D2D2D7;
-        }
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); margin: 0; padding-bottom: 90px; }
-
-        .app-header {
-            background: var(--card);
-            padding: env(safe-area-inset-top, 10px) 15px 10px 15px;
-            border-bottom: 1px solid var(--border);
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            min-height: 50px;
-        }
-
-        .btn-back {
-            position: absolute;
-            left: 10px;
-            background: none;
-            border: none;
-            color: var(--primary);
-            font-size: 24px;
-            padding: 10px;
-            cursor: pointer;
-        }
-
-        .app-header h1 {
-            margin: 0;
-            font-size: 15px;
-            font-weight: 700;
-            color: var(--primary);
-            line-height: 1.2;
-            text-align: center;
-        }
-
-        .view-container { padding: 12px; max-width: 600px; margin: 0 auto; }
-        .step-content { display: none; }
-        .step-content.active { display: block; }
-
-        .card { background: var(--card); border-radius: 16px; padding: 15px; margin-bottom: 15px; border: 1px solid rgba(0,0,0,0.05); }
-        .card-h { font-weight: 700; font-size: 14px; margin-bottom: 12px;
-        display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--bg); padding-bottom: 8px; }
-
-        .label { font-size: 10px; font-weight: 700; color: var(--secondary); text-transform: uppercase; margin-bottom: 4px; display: block; }
-        input, select { width: 100%; border: 1px solid var(--border); border-radius: 8px; padding: 10px; font-size: 14px; outline: none; background: #fff; }
-        input:focus { border-color: var(--primary); }
-        input.loss-warning { border-color: var(--danger); background: #fff5f5; color: var(--danger); }
-
-        .row-item { display: grid; gap: 8px; margin-bottom: 15px; padding: 12px; background: #f9f9fb; border-radius: 12px; position: relative; align-items: start; }
-        .btn-del { background: none; border: none; color: var(--danger); font-size: 20px; cursor: pointer; }
-        .btn-add { background: var(--bg); color: var(--primary); border: none; padding: 6px 12px; border-radius: 10px; font-weight: 600; font-size: 11px; }
-
-        .nav-bar { position: fixed; bottom: 0; left: 0; right: 0; background: #fff; display: flex; border-top: 1px solid var(--border); padding: 10px 5px 25px; z-index: 1000; }
-        .nav-item { flex: 1; border: none; background: none; display: flex; flex-direction: column; align-items: center; color: var(--secondary); font-size: 10px; font-weight: 600; }
-        .nav-item.active { color: var(--primary); }
-        .nav-item span { font-size: 20px; }
-
-        .btn-next { background: var(--primary); color: white; border: none; width: 100%; padding: 16px; border-radius: 12px; font-weight: 700; margin-top: 10px; }
-        .price-som-badge { font-size: 11px; color: var(--primary); font-weight: 700; display: block; margin-top: 4px; min-height: 14px; }
-
-        .summary-card { background: #1c1c1e; color: white; border-radius: 20px; padding: 20px; }
-        .profit-val { font-size: 32px; font-weight: 800; color: var(--success); display: block; text-align: center; margin: 15px 0; }
-        .sum-item { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #38383a; font-size: 13px; }
-
-        .buy-title { font-size: 12px; color: var(--primary); font-weight: 700; margin-top: 15px; margin-bottom: 5px; text-transform: uppercase; border-bottom: 1px solid #38383a; padding-bottom: 3px; }
-        .buy-row { display: flex; justify-content: space-between; font-size: 12px; padding: 4px 0; opacity: 0.9; }
-
-        /* Улучшенные стили для инфо-блока */
-.author-info {
-    margin-top: 25px;
-    padding: 18px;
-    background: #fff;
-    border-radius: 16px;
-    border: 1px solid var(--border);
-    font-size: 13px;
-    color: var(--text);
-    line-height: 1.6;
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>ЦЕХОВИК ERP</title>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="ЦЕХОВИК">
+<meta name="theme-color" content="#0a0a0a">
+<meta name="mobile-web-app-capable" content="yes">
+<link rel="apple-touch-icon" href="https://img.icons8.com/fluency/256/sewing-machine.png">
+<link rel="icon" href="https://img.icons8.com/fluency/256/sewing-machine.png">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Geologica:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0d0d0d;
+  --surface: #161616;
+  --surface2: #1e1e1e;
+  --border: #2a2a2a;
+  --border2: #333;
+  --text: #f0ede8;
+  --text2: #888;
+  --text3: #555;
+  --accent: #e8c547;
+  --accent2: #c9a830;
+  --green: #4ade80;
+  --red: #f87171;
+  --blue: #60a5fa;
+  --radius: 14px;
+  --radius-sm: 8px;
 }
-.author-info h3 { margin-top: 0; color: var(--primary); font-size: 15px; display: flex; align-items: center; gap: 8px; }
-.author-info p { margin: 8px 0; }
-.info-card { background: #f0f7ff; padding: 10px; border-radius: 10px; margin: 10px 0; border-left: 4px solid var(--primary); }
-.author-link {
-    display: inline-block;
-    margin-top: 10px;
-    background: #25D366;
-    color: white;
-    padding: 10px 15px;
-    border-radius: 10px;
-    text-decoration: none;
-    font-weight: 600;
-    text-align: center;
-    width: 100%;
+ 
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; margin: 0; padding: 0; }
+ 
+body {
+  font-family: 'Geologica', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  padding-bottom: 90px;
+  overflow-x: hidden;
 }
-    </style>
+ 
+/* ── HEADER ── */
+.header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: rgba(13,13,13,.95);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border);
+  padding: env(safe-area-inset-top, 0px) 16px 0;
+}
+.header-inner {
+  display: flex;
+  align-items: center;
+  height: 52px;
+  gap: 10px;
+}
+.btn-back {
+  background: var(--surface2);
+  border: 1px solid var(--border2);
+  color: var(--text);
+  width: 34px; height: 34px;
+  border-radius: 50%;
+  font-size: 16px;
+  cursor: pointer;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: all .2s;
+}
+.btn-back.visible { display: flex; }
+.btn-back:active { background: var(--border); }
+.logo {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 22px;
+  letter-spacing: .12em;
+  color: var(--accent);
+  line-height: 1;
+  flex-shrink: 0;
+}
+.step-title {
+  flex: 1;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text2);
+  text-align: right;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+ 
+/* ── PROGRESS BAR ── */
+.progress-wrap {
+  height: 2px;
+  background: var(--border);
+  position: relative;
+}
+.progress-fill {
+  height: 100%;
+  background: var(--accent);
+  transition: width .4s cubic-bezier(.4,0,.2,1);
+}
+ 
+/* ── STEP DOTS ── */
+.step-dots {
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+  padding: 10px 0 8px;
+}
+.sdot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--border2);
+  transition: all .3s;
+}
+.sdot.active { background: var(--accent); transform: scale(1.4); }
+.sdot.done { background: var(--accent2); }
+ 
+/* ── MAIN ── */
+.wrap { max-width: 560px; margin: 0 auto; padding: 16px 14px; }
+ 
+.step-content { display: none; animation: fadeIn .25s ease; }
+.step-content.active { display: block; }
+@keyframes fadeIn { from { opacity:0; transform:translateY(8px) } to { opacity:1; transform:translateY(0) } }
+ 
+/* ── STEP HEADER ── */
+.step-head {
+  margin-bottom: 20px;
+}
+.step-num {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 11px;
+  letter-spacing: .18em;
+  color: var(--accent);
+  margin-bottom: 4px;
+}
+.step-name {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 32px;
+  letter-spacing: .06em;
+  color: var(--text);
+  line-height: 1;
+}
+ 
+/* ── CARD ── */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px;
+  margin-bottom: 12px;
+}
+.card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border);
+}
+.card-head-title {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--text2);
+}
+ 
+/* ── FORM ── */
+.label {
+  display: block;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--text3);
+  margin-bottom: 6px;
+}
+.fi {
+  width: 100%;
+  background: var(--surface2);
+  border: 1px solid var(--border2);
+  border-radius: var(--radius-sm);
+  padding: 11px 13px;
+  font-family: 'Geologica', sans-serif;
+  font-size: 15px;
+  color: var(--text);
+  outline: none;
+  transition: border-color .2s, box-shadow .2s;
+  -webkit-appearance: none;
+}
+.fi::placeholder { color: var(--text3); }
+.fi:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(232,197,71,.1);
+}
+.fi option { background: var(--surface2); }
+.fr { margin-bottom: 12px; }
+.fr2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px; }
+.fr3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 12px; }
+textarea.fi { resize: none; height: 70px; font-size: 14px; }
+ 
+/* ── MATERIAL ROW ── */
+.mat-row {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 14px;
+  margin-bottom: 10px;
+  position: relative;
+}
+.mat-row-title {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.mat-result {
+  background: rgba(232,197,71,.07);
+  border: 1px solid rgba(232,197,71,.15);
+  border-radius: 6px;
+  padding: 8px 12px;
+  margin-top: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.mat-result-label { font-size: 11px; color: var(--text2); }
+.mat-result-val { font-size: 14px; font-weight: 600; color: var(--accent); }
+ 
+/* ── CHECKBOX ── */
+.check-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  margin-top: 8px;
+}
+.check-wrap input[type=checkbox] {
+  width: 16px; height: 16px;
+  accent-color: var(--accent);
+  cursor: pointer;
+}
+.check-wrap span { font-size: 12px; color: var(--text2); }
+ 
+/* ── BUTTONS ── */
+.btn-next {
+  width: 100%;
+  padding: 15px;
+  background: var(--accent);
+  color: #0d0d0d;
+  border: none;
+  border-radius: var(--radius);
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 18px;
+  letter-spacing: .1em;
+  cursor: pointer;
+  transition: all .2s;
+  margin-top: 8px;
+}
+.btn-next:active { transform: scale(.98); background: var(--accent2); }
+.btn-next.green { background: var(--green); }
+.btn-next.red { background: var(--red); }
+.btn-next.wa { background: #25d366; }
+ 
+.btn-add {
+  background: rgba(232,197,71,.1);
+  border: 1px solid rgba(232,197,71,.25);
+  color: var(--accent);
+  padding: 6px 14px;
+  border-radius: 50px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all .2s;
+}
+.btn-add:active { background: rgba(232,197,71,.2); }
+.btn-del {
+  background: rgba(248,113,113,.1);
+  border: 1px solid rgba(248,113,113,.2);
+  color: var(--red);
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  font-size: 14px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: all .2s;
+}
+.btn-del:active { background: rgba(248,113,113,.25); }
+ 
+/* ── FOT GRID ── */
+.fot-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+.fot-item { }
+.fot-total {
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.fot-total-label { font-size: 12px; color: var(--text2); }
+.fot-total-val {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 22px;
+  color: var(--accent);
+  letter-spacing: .05em;
+}
+ 
+/* ── COST MONITOR ── */
+.cost-monitor {
+  background: linear-gradient(135deg, rgba(232,197,71,.08), rgba(232,197,71,.03));
+  border: 1px solid rgba(232,197,71,.2);
+  border-radius: var(--radius);
+  padding: 18px;
+  text-align: center;
+  margin-bottom: 16px;
+}
+.cost-monitor-label {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: .15em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 6px;
+}
+.cost-monitor-val {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 40px;
+  letter-spacing: .05em;
+  color: var(--text);
+  line-height: 1;
+}
+ 
+/* ── SUMMARY ── */
+.summary-hero {
+  background: linear-gradient(135deg, #1a1a0a, #0d1a0d);
+  border: 1px solid rgba(74,222,128,.2);
+  border-radius: var(--radius);
+  padding: 22px;
+  text-align: center;
+  margin-bottom: 14px;
+  position: relative;
+  overflow: hidden;
+}
+.summary-hero::before {
+  content: '';
+  position: absolute;
+  top: -40px; right: -40px;
+  width: 120px; height: 120px;
+  background: radial-gradient(circle, rgba(74,222,128,.12), transparent 70%);
+  pointer-events: none;
+}
+.summary-hero-label {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  color: var(--green);
+  margin-bottom: 8px;
+}
+.summary-profit {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 52px;
+  letter-spacing: .04em;
+  color: var(--green);
+  line-height: 1;
+}
+.summary-profit.loss { color: var(--red); }
+.summary-sub {
+  font-size: 12px;
+  color: var(--text2);
+  margin-top: 8px;
+}
+.unit-profit-box {
+  margin-top: 14px;
+  background: rgba(74,222,128,.07);
+  border: 1px dashed rgba(74,222,128,.25);
+  border-radius: 8px;
+  padding: 10px;
+  font-size: 13px;
+  color: var(--text2);
+}
+.unit-profit-box b { color: var(--green); font-size: 16px; }
+ 
+.sum-section-title {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: .15em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin: 18px 0 10px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border);
+}
+.sum-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 9px 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 13px;
+}
+.sum-row:last-child { border-bottom: none; }
+.sum-row-label { color: var(--text2); }
+.sum-row-val { font-weight: 600; color: var(--text); }
+.sum-row-val.green { color: var(--green); }
+.sum-row-val.red { color: var(--red); }
+.sum-row-val.accent { color: var(--accent); }
+ 
+/* ── MATERIALS TABLE ── */
+.mat-table { width: 100%; border-collapse: collapse; font-size: 12px; margin-top: 8px; }
+.mat-table th {
+  padding: 8px 6px;
+  text-align: left;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--text3);
+  border-bottom: 1px solid var(--border2);
+}
+.mat-table td { padding: 10px 6px; border-bottom: 1px solid var(--border); vertical-align: top; }
+.mat-table tr:last-child td { border-bottom: none; }
+.mat-table .td-name { color: var(--text); font-weight: 500; }
+.mat-table .td-sub { font-size: 10px; color: var(--text3); margin-top: 2px; }
+.mat-table .td-center { text-align: center; color: var(--text2); }
+.mat-table .td-right { text-align: right; color: var(--accent); font-weight: 600; }
+ 
+/* ── HEADER INFO ── */
+.order-meta {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 14px;
+  flex-wrap: wrap;
+}
+.order-meta-chip {
+  background: var(--surface2);
+  border: 1px solid var(--border2);
+  border-radius: 50px;
+  padding: 4px 12px;
+  font-size: 11px;
+  color: var(--text2);
+}
+.order-meta-chip b { color: var(--text); }
+.order-name {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 28px;
+  letter-spacing: .06em;
+  color: var(--text);
+  margin-bottom: 12px;
+}
+ 
+/* ── BOTTOM NAV ── */
+.bnav {
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  background: rgba(13,13,13,.97);
+  backdrop-filter: blur(20px);
+  border-top: 1px solid var(--border);
+  display: flex;
+  padding: 8px 8px calc(env(safe-area-inset-bottom,0px) + 6px);
+  z-index: 200;
+}
+.nb {
+  flex: 1;
+  border: none;
+  background: none;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  color: var(--text3);
+  font-family: 'Geologica', sans-serif;
+  font-size: 9px;
+  font-weight: 500;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  padding: 6px 2px;
+  border-radius: 10px;
+  transition: all .2s;
+  position: relative;
+}
+.nb.active { color: var(--accent); }
+.nb.active::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 50%;
+  transform: translateX(-50%);
+  width: 20px; height: 2px;
+  background: var(--accent);
+  border-radius: 0 0 3px 3px;
+}
+.nb-icon { font-size: 20px; line-height: 1; }
+ 
+/* ── HINT BOX ── */
+.hint {
+  background: rgba(96,165,250,.07);
+  border: 1px solid rgba(96,165,250,.15);
+  border-radius: var(--radius-sm);
+  padding: 12px 14px;
+  font-size: 12px;
+  color: #93c5fd;
+  line-height: 1.6;
+  margin-bottom: 12px;
+}
+.hint b { color: var(--blue); }
+ 
+/* ── AUTHOR ── */
+.author-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 18px;
+  margin-top: 16px;
+}
+.author-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 20px;
+  letter-spacing: .08em;
+  color: var(--accent);
+  margin-bottom: 10px;
+}
+.author-body { font-size: 13px; color: var(--text2); line-height: 1.7; }
+.hint-row {
+  background: var(--surface2);
+  border-left: 3px solid var(--accent);
+  border-radius: 0 6px 6px 0;
+  padding: 10px 12px;
+  margin: 8px 0;
+  font-size: 12px;
+  color: var(--text2);
+  line-height: 1.6;
+}
+.hint-row b { color: var(--text); }
+.wa-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: #25d366;
+  color: #fff;
+  padding: 13px;
+  border-radius: var(--radius-sm);
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+  margin-top: 14px;
+}
+.author-note {
+  font-size: 11px;
+  color: var(--text3);
+  font-style: italic;
+  margin-top: 10px;
+  text-align: center;
+}
+ 
+/* ── CLEAR BTN ── */
+.btn-clear {
+  width: 100%;
+  padding: 13px;
+  background: transparent;
+  border: 1px solid rgba(248,113,113,.3);
+  color: var(--red);
+  border-radius: var(--radius);
+  font-family: 'Geologica', sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all .2s;
+  margin-bottom: 12px;
+}
+.btn-clear:active { background: rgba(248,113,113,.08); }
+ 
+.price-badge {
+  font-size: 11px;
+  color: var(--accent);
+  font-weight: 600;
+  margin-top: 4px;
+  min-height: 14px;
+}
+</style>
 </head>
 <body>
-
-<header class="app-header">
+ 
+<header class="header">
+  <div class="header-inner">
     <button class="btn-back" id="btn-back" onclick="goBack()">←</button>
-    <h1 id="step-title">Шаг 1: Параметры заказа</h1>
+    <div class="logo">⚙ ЦЕХОВИК</div>
+    <div class="step-title" id="step-title">Параметры заказа</div>
+  </div>
+  <div class="progress-wrap">
+    <div class="progress-fill" id="progress-fill" style="width:12.5%"></div>
+  </div>
+  <div class="step-dots" id="step-dots"></div>
 </header>
-
-<div class="view-container" id="tech-card">
-
-    <div id="step-1" class="step-content active">
-        <div class="card">
-            <div class="card-h">Параметры</div>
-            <div><label class="label">Название модели</label><input type="text" id="m_name" placeholder="Название"></div>
+ 
+<div class="wrap" id="tech-card">
+ 
+  <!-- ── STEP 1: ПАРАМЕТРЫ ── -->
+  <div id="step-1" class="step-content active">
+    <div class="step-head">
+      <div class="step-num">ШАГ 01 / 08</div>
+      <div class="step-name">ПАРАМЕТРЫ ЗАКАЗА</div>
+    </div>
+    <div class="card">
+      <div class="fr">
+        <label class="label">Название модели</label>
+        <input type="text" class="fi" id="m_name" placeholder="Например: Жилет мужской арт.001" oninput="saveToLocal()">
+      </div>
+    </div>
+    <button class="btn-clear" onclick="clearData()">🗑 Очистить весь расчёт</button>
+    <button class="btn-next" onclick="goToStep(2)">ДАЛЕЕ: ТКАНИ →</button>
+ 
+    <div class="author-card">
+      <div class="author-title">💡 КАК ПОЛЬЗОВАТЬСЯ</div>
+      <div class="author-body">
+        <b style="color:var(--text)">ЦЕХОВИК ERP</b> — бесплатный инструмент для расчёта полной себестоимости изделия: ткани, клеевые, фурнитура, работа персонала и расходы цеха.
+      </div>
+      <div class="hint-row"><b>Валюта:</b> Если покупаете ткань в долларах — укажите курс по которому фактически купили.</div>
+      <div class="hint-row"><b>Выпад %:</b> Обрезки и брак. Точный расход → 0. Стандарт → 5–7%.</div>
+      <div class="hint-row"><b>Давальческое:</b> Отмечайте если материал предоставил заказчик — тогда его стоимость не войдёт в себестоимость.</div>
+      <p class="author-note">Автор проекта: Умар Элдияров</p>
+      <a href="https://wa.me/996502516726" class="wa-link">💬 Написать разработчику</a>
+    </div>
+  </div>
+ 
+  <!-- ── STEP 2: ТКАНИ ── -->
+  <div id="step-2" class="step-content">
+    <div class="step-head">
+      <div class="step-num">ШАГ 02 / 08</div>
+      <div class="step-name">ТКАНИ И ПОДКЛАД</div>
+    </div>
+    <div class="hint">Добавьте все виды тканей включая подклад. Укажите расход в метрах на одно изделие.</div>
+    <div id="fabric-list"></div>
+    <button class="btn-add" onclick="addFabric()" style="width:100%;padding:12px;border-radius:var(--radius);margin-bottom:12px;">+ Добавить ткань</button>
+    <button class="btn-next" onclick="goToStep(3)">ДАЛЕЕ: КЛЕЕВЫЕ →</button>
+  </div>
+ 
+  <!-- ── STEP 3: КЛЕЕВЫЕ ── -->
+  <div id="step-3" class="step-content">
+    <div class="step-head">
+      <div class="step-num">ШАГ 03 / 08</div>
+      <div class="step-name">КЛЕЕВЫЕ МАТЕРИАЛЫ</div>
+    </div>
+    <div class="hint">Флизелин, дублерин и другие клеевые. Расход указывается в сантиметрах на одно изделие.</div>
+    <div id="glue-list"></div>
+    <button class="btn-add" onclick="addGlue()" style="width:100%;padding:12px;border-radius:var(--radius);margin-bottom:12px;">+ Добавить клеевую</button>
+    <button class="btn-next" onclick="goToStep(4)">ДАЛЕЕ: ФУРНИТУРА →</button>
+  </div>
+ 
+  <!-- ── STEP 4: ФУРНИТУРА ── -->
+  <div id="step-4" class="step-content">
+    <div class="step-head">
+      <div class="step-num">ШАГ 04 / 08</div>
+      <div class="step-name">ФУРНИТУРА</div>
+    </div>
+    <div class="hint">Пуговицы, молнии, нитки, этикетки и т.д. Укажите цену за единицу и количество на изделие.</div>
+    <div id="acc-list"></div>
+    <button class="btn-add" onclick="addAcc()" style="width:100%;padding:12px;border-radius:var(--radius);margin-bottom:12px;">+ Добавить фурнитуру</button>
+    <button class="btn-next" onclick="goToStep(5)">ДАЛЕЕ: ТРУДОЗАТРАТЫ →</button>
+  </div>
+ 
+  <!-- ── STEP 5: ФОТ ── -->
+  <div id="step-5" class="step-content">
+    <div class="step-head">
+      <div class="step-num">ШАГ 05 / 08</div>
+      <div class="step-name">ТРУДОЗАТРАТЫ</div>
+    </div>
+    <div class="card">
+      <div class="card-head">
+        <span class="card-head-title">Оплата за работу — 1 единица</span>
+      </div>
+      <div class="fot-grid">
+        <div class="fr"><label class="label">Крой</label><input type="number" class="fi fot-in" oninput="calc()" placeholder="0"></div>
+        <div class="fr"><label class="label">Пошив</label><input type="number" class="fi fot-in" oninput="calc()" placeholder="0"></div>
+        <div class="fr"><label class="label">Утюг (ВТО)</label><input type="number" class="fi fot-in" oninput="calc()" placeholder="0"></div>
+        <div class="fr"><label class="label">ОТК / Чистка</label><input type="number" class="fi fot-in" oninput="calc()" placeholder="0"></div>
+        <div class="fr"><label class="label">Упаковка / Маркировка</label><input type="number" class="fi fot-in" oninput="calc()" placeholder="0"></div>
+        <div class="fr"><label class="label">Петли / Пуговицы</label><input type="number" class="fi fot-in" oninput="calc()" placeholder="0"></div>
+        <div class="fr"><label class="label">Технолог</label><input type="number" class="fi fot-in" oninput="calc()" placeholder="0"></div>
+        <div class="fr"><label class="label">Доп. операции</label><input type="number" class="fi fot-in" oninput="calc()" placeholder="0"></div>
+      </div>
+      <div class="fot-total">
+        <span class="fot-total-label">Итого работа / 1 ед.</span>
+        <span class="fot-total-val" id="fot-total-badge">0 сом</span>
+      </div>
+    </div>
+    <button class="btn-next" onclick="goToStep(6)">ДАЛЕЕ: РАСХОДЫ ЦЕХА →</button>
+  </div>
+ 
+  <!-- ── STEP 6: НАЛОГИ ── -->
+  <div id="step-6" class="step-content">
+    <div class="step-head">
+      <div class="step-num">ШАГ 06 / 08</div>
+      <div class="step-name">НАЛОГИ И ЦЕХ</div>
+    </div>
+    <div class="card">
+      <div class="fr">
+        <label class="label">Налог с оборота</label>
+        <select class="fi" id="tax_rate" onchange="calc()">
+          <option value="0.0025">0.25% — Льготный</option>
+          <option value="0">0% — Без налога</option>
+          <option value="0.04">4% — Стандартный</option>
+        </select>
+      </div>
+      <div class="fr">
+        <label class="label">Расходы цеха на 1 ед. (аренда, свет, вода…)</label>
+        <input type="number" class="fi" id="fixed_exp" oninput="calc()" placeholder="0">
+      </div>
+    </div>
+    <button class="btn-next" onclick="goToStep(7)">ДАЛЕЕ: ЦЕНА ПРОДАЖИ →</button>
+  </div>
+ 
+  <!-- ── STEP 7: ЦЕНА ── -->
+  <div id="step-7" class="step-content">
+    <div class="step-head">
+      <div class="step-num">ШАГ 07 / 08</div>
+      <div class="step-name">ЦЕНА ПРОДАЖИ</div>
+    </div>
+    <div class="cost-monitor">
+      <div class="cost-monitor-label">Расчётная себестоимость</div>
+      <div class="cost-monitor-val" id="monitor_cost">0 сом</div>
+    </div>
+    <div class="card">
+      <div class="fr2">
+        <div>
+          <label class="label">Валюта продажи</label>
+          <select class="fi" id="cl_curr" onchange="toggleClientRate(); calc()">
+            <option value="KGS">KGS — сом</option>
+            <option value="USD">USD — $</option>
+            <option value="RUB">RUB — ₽</option>
+          </select>
         </div>
-        <button onclick="clearData()" style="background: var(--danger); color: white; border: none; padding: 12px; border-radius: 12px; margin-bottom: 15px; width: 100%; font-weight: bold; cursor: pointer;">
-    🗑 Очистить весь расчет
-        </button>
-        <button class="btn-next" onclick="goToStep(2)">Далее: Ткани</button>
-
-        <div class="author-info">
-    <h3><span style="font-size:20px;">💡</span> Полезные советы:</h3>
-
-    <p>Система <b>«ЦЕХОВИК ERP»</b> предоставляется бесплатно для поддержки швейного бизнеса. Полный цикл себестоимости: автоматический расчет стоимости одной единицы изделия, включая ткани, подклад, клеевые материалы, фурнитуру и работу персанала.</p>
-
-    <div class="info-card">
-        <b>Валюта:</b> Если вы покупаете ткань в долларах, указывайте курс, по которому вы её фактически приобрели.
-    </div>
-
-    <div class="info-card">
-        <b>Выпад %:</b> Учет обрезков и брака ткани.
-        <ul style="padding-left: 20px; margin: 5px 0;">
-            <li>Если расход точный — ставьте <b>0</b>.</li>
-            <li>Стандартный запас — <b>5-7%</b>.</li>
-        </ul>
-    </div>
-
-    <p style="font-size: 11px; color: var(--secondary); font-style: italic;">
-        Мы стараемся сделать расчеты точными, однако автор не несет ответственности за финансовые расхождения. Пожалуйста, всегда проверяйте цифры.
-                                                                                                                        Автор проекта: Умар Элдияров
-    </p>
-
-    <p><b>Нашли баг или есть идея?</b> Пишите нам:</p>
-    <a href="https://wa.me/996502516726" class="author-link">
-        💬 Написать разработчику (WhatsApp)
-    </a>
-</div>
-
-
-    </div>
-
-
-
-    <div id="step-2" class="step-content">
-        <div class="card">
-            <div class="card-h">Ткани и Подклад <button class="btn-add" onclick="addFabric()">+ Добавить</button></div>
-            <div id="fabric-list"></div>
+        <div>
+          <label class="label">Курс (сом за 1)</label>
+          <input type="number" class="fi" id="cl_rate" value="1" disabled oninput="calc()" placeholder="Курс">
         </div>
-        <button class="btn-next" onclick="goToStep(3)">Далее: Клеевые</button>
-    </div>
-
-    <div id="step-3" class="step-content">
-        <div class="card">
-            <div class="card-h">Клеевые <button class="btn-add" onclick="addGlue()">+ Добавить</button></div>
-            <div id="glue-list"></div>
+      </div>
+      <div class="fr2">
+        <div>
+          <label class="label">Партия (шт)</label>
+          <input type="number" class="fi" id="qty" placeholder="0" oninput="calc()">
         </div>
-        <button class="btn-next" onclick="goToStep(4)">Далее: Фурнитура</button>
-    </div>
-
-    <div id="step-4" class="step-content">
-        <div class="card">
-            <div class="card-h">Фурнитура <button class="btn-add" onclick="addAcc()">+ Добавить</button></div>
-            <div id="acc-list"></div>
+        <div>
+          <label class="label">Оптовая цена (<span id="cl_curr_label">KGS</span>)</label>
+          <input type="number" class="fi" id="price_cl_val" placeholder="0" oninput="calc()">
         </div>
-        <button class="btn-next" onclick="goToStep(5)">Далее: Трудозатраты</button>
+      </div>
+      <div id="cl_price_sub" style="font-size:12px;font-weight:600;color:var(--accent);line-height:1.5;margin-top:4px;"></div>
     </div>
-
-    <div id="step-5" class="step-content">
-        <div class="card">
-            <div class="card-h">Оплата за работу (1 ед.)</div>
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-                <div><label class="label">Крой</label><input type="number" class="fot-in" oninput="calc()"></div>
-                <div><label class="label">Пошив</label><input type="number" class="fot-in" oninput="calc()"></div>
-                <div><label class="label">Утюг (вто)</label><input type="number" class="fot-in" oninput="calc()"></div>
-                <div><label class="label">ОТК / Чистка</label><input type="number" class="fot-in" oninput="calc()"></div>
-                <div><label class="label">Упаковка / Маркировка</label><input type="number" class="fot-in" oninput="calc()"></div>
-                <div><label class="label">Петли / Пуговицы</label><input type="number" class="fot-in" oninput="calc()"></div>
-                <div><label class="label">Технолог</label><input type="number" class="fot-in" oninput="calc()"></div>
-                <div><label class="label">Доп. операции (Резерв)</label><input type="number" class="fot-in" oninput="calc()"></div>
-            </div>
-            <div style="margin-top: 15px; padding-top: 10px; border-top: 1px solid var(--bg); display: flex; justify-content: space-between; align-items: center;">
-                <span class="label" style="margin:0">Итого работы (на 1 ед):</span>
-                <b id="fot-total-badge" style="color: var(--primary); font-size: 16px;">0 сом</b>
-            </div>
-        </div>
-        <button class="btn-next" onclick="goToStep(6)">Далее: Налоги и Цех</button>
+    <button class="btn-next green" onclick="goToStep(8)">ПОСМОТРЕТЬ ИТОГ →</button>
+  </div>
+ 
+  <!-- ── STEP 8: ИТОГ ── -->
+  <div id="step-8" class="step-content">
+    <div class="step-head">
+      <div class="step-num">ШАГ 08 / 08</div>
+      <div class="step-name">ФИНАЛЬНЫЙ ИТОГ</div>
     </div>
-
-    <div id="step-6" class="step-content">
-        <div class="card">
-            <div class="card-h">Расходы и Налоги</div>
-            <label class="label">Налог с оборота</label>
-            <select id="tax_rate" onchange="calc()" style="margin-bottom: 15px;">
-                <option value="0.0025">0.25% (Льготный)</option>
-                <option value="0">0%</option>
-                <option value="0.04">4%</option>
-            </select>
-            <label class="label">Расходы цеха (Аренда, свет и.тд) на 1 ед.</label>
-            <input type="number" id="fixed_exp" oninput="calc()">
-        </div>
-        <button class="btn-next" onclick="goToStep(7)">Далее: Цена продажи</button>
+ 
+    <div class="order-meta">
+      <div class="order-meta-chip">ID: <b id="res_id">—</b></div>
+      <div class="order-meta-chip"><b id="res_date_full">—</b></div>
     </div>
-
-    <div id="step-7" class="step-content">
-        <div class="card">
-            <div class="card-h">Установка цены</div>
-            <div style="background: #f0f7ff; padding: 12px; border-radius: 8px; margin-bottom: 15px; text-align: center;">
-                <div style="font-size: 11px; color: var(--secondary); margin-bottom: 2px;">РАСЧЕТНАЯ СЕБЕСТОИМОСТЬ</div>
-                <div id="monitor_cost" style="font-size: 20px; font-weight: 800; color: var(--text);">0 сом</div>
-            </div>
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-                <div><label class="label">Валюта продажи</label>
-                    <select id="cl_curr" onchange="toggleClientRate(); calc()">
-                        <option value="KGS">KGS (сом)</option>
-                        <option value="USD">USD ($)</option>
-                        <option value="RUB">RUB (₽)</option>
-                    </select>
-                </div>
-                <div><label class="label">Курс (сом за 1 ед.)</label><input type="number" id="cl_rate" value="1" disabled oninput="calc()" placeholder="Курс"></div>
-                <div><label class="label">Партия (шт)</label><input type="number" id="qty" placeholder="0" oninput="calc()"></div>
-                <div><label class="label">Оптовая цена (<span id="cl_curr_label">KGS</span>)</label><input type="number" id="price_cl_val" placeholder="Цена ед." oninput="calc()"></div>
-            </div>
-            <div id="cl_price_sub" style="margin-top:15px; font-size:12px; font-weight:600; color:var(--primary); line-height: 1.4;"></div>
-        </div>
-        <button class="btn-next" onclick="goToStep(8)" style="background:var(--success)">Посмотреть финальный итог</button>
+    <div class="order-name" id="res_m_name">—</div>
+    <div class="order-meta">
+      <div class="order-meta-chip">Партия: <b id="res_qty">0 шт</b></div>
+      <div class="order-meta-chip">Курс: <b id="res_rate_val">—</b></div>
     </div>
-
-    <div id="step-8" class="step-content">
-    <div class="summary-card" id="printable-summary" style="background: #1c1c1e; color: white; border-radius: 20px; padding: 20px; font-family: 'Inter', sans-serif;">
-
-        <div style="text-align: center; border-bottom: 1px solid #38383a; padding-bottom: 15px; margin-bottom: 15px;">
-            <div style="font-size: 10px; color: #0071E3; font-weight: 700; margin-bottom: 5px;">
-                ID: <span id="res_id">000000</span> | <span id="res_date_full">-</span>
-            </div>
-            <div id="res_m_name" style="font-size: 22px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px;">-</div>
-            <div style="font-size: 13px; color: #86868b; margin-top: 5px;">Партия: <b id="res_qty" style="color:white">0 шт</b></div>
-        </div>
-
-        <div style="background: rgba(48, 209, 88, 0.1); border-radius: 16px; padding: 15px; text-align: center; margin-bottom: 20px; border: 1px solid rgba(48, 209, 88, 0.2);">
-            <div style="font-size: 11px; color: #30D158; text-transform: uppercase; font-weight: 700; margin-bottom: 5px;">Чистая прибыль цеха</div>
-            <div id="res_profit" style="font-size: 32px; font-weight: 800; color: #30D158;">0 сом</div>
-            <div style="font-size: 12px; margin-top: 8px; opacity: 0.8;">
-                Себестоимость 1 ед: <b id="res_unit_cost" style="color:white">0 сом</b>
-            </div>
-
-            <div id="res_unit_profit_box"></div>
-        </div>
-
-        <div class="buy-title" style="color:#0071E3; border-bottom: 1px solid #38383a; font-size: 11px; padding-bottom: 5px; margin-bottom: 10px;">1. Финансовые показатели</div>
-        <div class="sum-item"><span>Общая выручка:</span><b id="res_revenue">0 сом</b></div>
-        <div class="sum-item"><span>Общие расходы:</span><b id="res_total_exp">0 сом</b></div>
-        <div class="sum-item"><span>Налог:</span><b id="res_tax" style="color:#FF453A">0 сом</b></div>
-        <div class="sum-item" style="font-size:11px; color:#86868b; border:none;"><span>Курс сделки:</span><b id="res_rate_val">-</b></div>
-
-        <div class="buy-title" style="color:#0071E3; border-bottom: 1px solid #38383a; font-size: 11px; padding-bottom: 5px; margin-top: 15px; margin-bottom: 10px;">2. Затраты на партию</div>
-        <div id="res_fabric_consumption_list"></div>
-
-        <div class="sum-item"><span>Ткани и подклад:</span><b id="res_sum_fabrics">0 сом</b></div>
-        <div class="sum-item"><span>Клеевые материалы:</span><b id="res_sum_glues">0 сом</b></div>
-        <div class="sum-item"><span>Вся фурнитура:</span><b id="res_sum_accs">0 сом</b></div>
-        <div class="sum-item"><span>Работа (ФОТ):</span><b id="res_sum_fot">0 сом</b></div>
-        <div class="sum-item"><span>Расходы цеха (Аренда, свет и.тд):</span><b id="res_sum_fixed">0 сом</b></div>
-
-        <div id="res_detailed_materials"></div>
+ 
+    <div class="summary-hero">
+      <div class="summary-hero-label">Чистая прибыль цеха</div>
+      <div class="summary-profit" id="res_profit">0 сом</div>
+      <div class="summary-sub">Себестоимость 1 ед: <b id="res_unit_cost" style="color:var(--text)">0 сом</b></div>
+      <div class="unit-profit-box" id="res_unit_profit_box"></div>
     </div>
-
-
-    <button class="btn-next" onclick="shareWhatsApp()" style="background: #25D366; margin-bottom: 20px;">Отправить в WhatsApp 💬</button>
-</div>
-
-</div>
-
-<nav class="nav-bar">
-    <button class="nav-item active" onclick="goToStep(1)"><span>📋</span>Заказ</button>
-    <button class="nav-item" onclick="goToStep(2)"><span>✂️</span>Материал</button>
-    <button class="nav-item" onclick="goToStep(5)"><span>🪡</span>ФОТ</button>
-    <button class="nav-item" onclick="goToStep(7)"><span>💰</span>Цена</button>
-    <button class="nav-item" onclick="goToStep(8)"><span>📊</span>Итог</button>
+ 
+    <div class="card">
+      <div class="sum-section-title">1. Финансовые показатели</div>
+      <div class="sum-row"><span class="sum-row-label">Общая выручка</span><span class="sum-row-val green" id="res_revenue">0 сом</span></div>
+      <div class="sum-row"><span class="sum-row-label">Общие расходы</span><span class="sum-row-val" id="res_total_exp">0 сом</span></div>
+      <div class="sum-row"><span class="sum-row-label">Налог</span><span class="sum-row-val red" id="res_tax">0 сом</span></div>
+ 
+      <div class="sum-section-title">2. Затраты на партию</div>
+      <div class="sum-row"><span class="sum-row-label">Ткани и подклад</span><span class="sum-row-val accent" id="res_sum_fabrics">0 сом</span></div>
+      <div class="sum-row"><span class="sum-row-label">Клеевые материалы</span><span class="sum-row-val accent" id="res_sum_glues">0 сом</span></div>
+      <div class="sum-row"><span class="sum-row-label">Вся фурнитура</span><span class="sum-row-val accent" id="res_sum_accs">0 сом</span></div>
+      <div class="sum-row"><span class="sum-row-label">Работа (ФОТ)</span><span class="sum-row-val accent" id="res_sum_fot">0 сом</span></div>
+      <div class="sum-row"><span class="sum-row-label">Расходы цеха</span><span class="sum-row-val accent" id="res_sum_fixed">0 сом</span></div>
+    </div>
+ 
+    <div class="card">
+      <div class="sum-section-title">3. Расход материалов на партию</div>
+      <div id="res_fabric_consumption_list"></div>
+      <div id="res_detailed_materials"></div>
+    </div>
+ 
+    <button class="btn-next wa" onclick="shareWhatsApp()" style="margin-bottom:10px;">💬 ОТПРАВИТЬ В WHATSAPP</button>
+    <button class="btn-next" onclick="goToStep(1)" style="background:var(--surface2);color:var(--text);border:1px solid var(--border2);">← НОВЫЙ РАСЧЁТ</button>
+  </div>
+ 
+</div><!-- /wrap -->
+ 
+<!-- BOTTOM NAV -->
+<nav class="bnav">
+  <button class="nb active" onclick="goToStep(1)"><span class="nb-icon">📋</span>Заказ</button>
+  <button class="nb" onclick="goToStep(2)"><span class="nb-icon">✂️</span>Ткани</button>
+  <button class="nb" onclick="goToStep(5)"><span class="nb-icon">🪡</span>ФОТ</button>
+  <button class="nb" onclick="goToStep(7)"><span class="nb-icon">💰</span>Цена</button>
+  <button class="nb" onclick="goToStep(8)"><span class="nb-icon">📊</span>Итог</button>
 </nav>
-
+ 
 <script>
-    let currentStep = 1;
-    const titles = ["Параметры заказа", "Ткани и Подклад", "Клеевые", "Фурнитура", "Трудозатраты", "Расходы цеха", "Цена продажи", "Итоги"];
-
-    // 1. УЛУЧШЕННАЯ ФУНКЦИЯ СОХРАНЕНИЯ (сохраняет каждую строчку)
-    function saveToLocal() {
-        const data = {
-            m_name: document.getElementById('m_name').value,
-            qty: document.getElementById('qty').value,
-            cl_price_val: document.getElementById('price_cl_val').value,
-            fixed_exp: document.getElementById('fixed_exp').value,
-            // Сохраняем все ткани
-            fabrics: Array.from(document.querySelectorAll('.fabric-row')).map(row => ({
-                name: row.querySelector('.f-name').value,
-                use: row.querySelector('.f-use').value,
-                loss: row.querySelector('.f-loss').value,
-                curr: row.querySelector('.f-curr').value,
-                rate: row.querySelector('.f-rate').value, // ДОБАВЬТЕ ЭТУ СТРОКУ
-                price: row.querySelector('.f-price').value,
-                dav: row.querySelector('.f-dav').checked
-            })),
-            // Сохраняем все клеевые
-            glues: Array.from(document.querySelectorAll('.glue-row')).map(row => ({
-                name: row.querySelector('.g-name').value,
-                mode: row.querySelector('.g-mode').value,
-                price: row.querySelector('.g-price').value,
-                roll: row.querySelector('.g-roll-len').value,
-                use: row.querySelector('.f-use-cm').value,
-                dav: row.querySelector('.g-dav').checked
-            })),
-            // Сохраняем всю фурнитуру
-            accs: Array.from(document.querySelectorAll('.acc-row')).map(row => ({
-                name: row.querySelector('.a-name').value,
-                unit: row.querySelector('.a-unit').value,
-                price: row.querySelector('.a-price').value,
-                use: row.querySelector('.a-use').value,
-                dav: row.querySelector('.a-dav').checked
-            })),
-            fot_values: Array.from(document.querySelectorAll('.fot-in')).map(i => i.value)
-        };
-        localStorage.setItem('cehovik_data', JSON.stringify(data));
-    }
-
-    // 2. УЛУЧШЕННАЯ ФУНКЦИЯ ЗАГРУЗКИ (восстанавливает все строчки)
-    function loadFromLocal() {
-        const saved = localStorage.getItem('cehovik_data');
-        if (!saved) return;
-        const data = JSON.parse(saved);
-
-        document.getElementById('m_name').value = data.m_name || '';
-        document.getElementById('qty').value = data.qty || '';
-        document.getElementById('price_cl_val').value = data.cl_price_val || '';
-        document.getElementById('fixed_exp').value = data.fixed_exp || '';
-
-        // Восстанавливаем ткани
-        if (data.fabrics) {
+let currentStep = 1;
+const titles = ["Параметры заказа","Ткани и Подклад","Клеевые","Фурнитура","Трудозатраты","Расходы цеха","Цена продажи","Итоги"];
+const totalSteps = 8;
+ 
+// ── STEP DOTS ──
+function renderDots() {
+  const wrap = document.getElementById('step-dots');
+  wrap.innerHTML = '';
+  for(let i=1;i<=totalSteps;i++){
+    const d = document.createElement('div');
+    d.className = 'sdot' + (i===currentStep?' active':(i<currentStep?' done':''));
+    wrap.appendChild(d);
+  }
+}
+ 
+function goToStep(n) {
+  currentStep = n;
+  document.querySelectorAll('.step-content').forEach(s => s.classList.remove('active'));
+  document.getElementById('step-' + n).classList.add('active');
+  document.getElementById('step-title').innerText = titles[n-1];
+  const back = document.getElementById('btn-back');
+  if(n > 1) back.classList.add('visible'); else back.classList.remove('visible');
+  document.getElementById('progress-fill').style.width = ((n/totalSteps)*100) + '%';
+  renderDots();
+  const stepMapping = [1,2,5,7,8];
+  document.querySelectorAll('.nb').forEach((btn,i) => btn.classList.toggle('active', n===stepMapping[i]));
+  window.scrollTo(0,0);
+  if(n===8) calc();
+}
+ 
+function goBack() { if(currentStep > 1) goToStep(currentStep - 1); }
+ 
+// ── SAVE / LOAD ──
+function saveToLocal() {
+  const data = {
+    m_name: document.getElementById('m_name').value,
+    qty: document.getElementById('qty').value,
+    cl_price_val: document.getElementById('price_cl_val').value,
+    fixed_exp: document.getElementById('fixed_exp').value,
+    tax_rate: document.getElementById('tax_rate').value,
+    cl_curr: document.getElementById('cl_curr').value,
+    cl_rate: document.getElementById('cl_rate').value,
+    fabrics: Array.from(document.querySelectorAll('.fabric-row')).map(row => ({
+      name: row.querySelector('.f-name').value,
+      use: row.querySelector('.f-use').value,
+      loss: row.querySelector('.f-loss').value,
+      curr: row.querySelector('.f-curr').value,
+      rate: row.querySelector('.f-rate').value,
+      price: row.querySelector('.f-price').value,
+      dav: row.querySelector('.f-dav').checked
+    })),
+    glues: Array.from(document.querySelectorAll('.glue-row')).map(row => ({
+      name: row.querySelector('.g-name').value,
+      mode: row.querySelector('.g-mode').value,
+      price: row.querySelector('.g-price').value,
+      roll: row.querySelector('.g-roll-len').value,
+      use: row.querySelector('.f-use-cm').value,
+      dav: row.querySelector('.g-dav').checked
+    })),
+    accs: Array.from(document.querySelectorAll('.acc-row')).map(row => ({
+      name: row.querySelector('.a-name').value,
+      unit: row.querySelector('.a-unit').value,
+      price: row.querySelector('.a-price').value,
+      use: row.querySelector('.a-use').value,
+      dav: row.querySelector('.a-dav').checked
+    })),
+    fot_values: Array.from(document.querySelectorAll('.fot-in')).map(i => i.value)
+  };
+  localStorage.setItem('cehovik_data', JSON.stringify(data));
+}
+ 
+function loadFromLocal() {
+  const saved = localStorage.getItem('cehovik_data');
+  if(!saved) return;
+  const data = JSON.parse(saved);
+  document.getElementById('m_name').value = data.m_name || '';
+  document.getElementById('qty').value = data.qty || '';
+  document.getElementById('price_cl_val').value = data.cl_price_val || '';
+  document.getElementById('fixed_exp').value = data.fixed_exp || '';
+  if(data.tax_rate) document.getElementById('tax_rate').value = data.tax_rate;
+  if(data.cl_curr) { document.getElementById('cl_curr').value = data.cl_curr; document.getElementById('cl_curr_label').innerText = data.cl_curr; }
+  if(data.cl_rate) { document.getElementById('cl_rate').value = data.cl_rate; if(data.cl_curr && data.cl_curr !== 'KGS') document.getElementById('cl_rate').disabled = false; }
+ 
+  if(data.fabrics) {
     document.getElementById('fabric-list').innerHTML = '';
     data.fabrics.forEach(f => {
-        addFabric();
-        const row = document.querySelector('#fabric-list .fabric-row:last-child');
-        row.querySelector('.f-name').value = f.name;
-        row.querySelector('.f-use').value = f.use;
-        row.querySelector('.f-loss').value = f.loss;
-        row.querySelector('.f-curr').value = f.curr;
-        row.querySelector('.f-price').value = f.price;
-        row.querySelector('.f-rate').value = f.rate || 1; // Загружаем курс
-        row.querySelector('.f-dav').checked = f.dav;
-
-        // ИСПРАВЛЕНИЕ БАГА:
-        const rateInput = row.querySelector('.f-rate');
-        if (f.curr !== 'KGS') {
-            rateInput.disabled = false;
-            rateInput.style.opacity = "1";
-        } else {
-            rateInput.disabled = true;
-            rateInput.style.opacity = "0.5";
-        }
+      addFabric();
+      const row = document.querySelector('#fabric-list .fabric-row:last-child');
+      row.querySelector('.f-name').value = f.name || '';
+      row.querySelector('.f-use').value = f.use || '';
+      row.querySelector('.f-loss').value = f.loss || 0;
+      row.querySelector('.f-curr').value = f.curr || 'KGS';
+      row.querySelector('.f-price').value = f.price || '';
+      row.querySelector('.f-rate').value = f.rate || 1;
+      row.querySelector('.f-dav').checked = f.dav || false;
+      const ri = row.querySelector('.f-rate');
+      if(f.curr !== 'KGS') { ri.disabled = false; ri.style.opacity = '1'; }
     });
+  }
+  if(data.glues) {
+    document.getElementById('glue-list').innerHTML = '';
+    data.glues.forEach(g => {
+      addGlue();
+      const row = document.querySelector('#glue-list .glue-row:last-child');
+      row.querySelector('.g-name').value = g.name || '';
+      row.querySelector('.g-mode').value = g.mode || 'm';
+      row.querySelector('.g-price').value = g.price || '';
+      row.querySelector('.g-roll-len').value = g.roll || '';
+      row.querySelector('.f-use-cm').value = g.use || '';
+      row.querySelector('.g-dav').checked = g.dav || false;
+      if(g.mode === 'roll') row.querySelector('.g-roll-len').disabled = false;
+    });
+  }
+  if(data.accs) {
+    document.getElementById('acc-list').innerHTML = '';
+    data.accs.forEach(a => {
+      addAcc();
+      const row = document.querySelector('#acc-list .acc-row:last-child');
+      row.querySelector('.a-name').value = a.name || '';
+      row.querySelector('.a-unit').value = a.unit || 'шт';
+      row.querySelector('.a-price').value = a.price || '';
+      row.querySelector('.a-use').value = a.use || '';
+      row.querySelector('.a-dav').checked = a.dav || false;
+    });
+  }
+  const fotInputs = document.querySelectorAll('.fot-in');
+  if(data.fot_values) data.fot_values.forEach((v,i) => { if(fotInputs[i]) fotInputs[i].value = v; });
+  if(typeof calc === 'function') calc();
 }
-
-        // Восстанавливаем клеевые
-        // Восстанавливаем ткани
-        if (data.fabrics) {
-            document.getElementById('fabric-list').innerHTML = '';
-            data.fabrics.forEach(f => {
-                addFabric();
-                const row = document.querySelector('#fabric-list .fabric-row:last-child');
-                row.querySelector('.f-name').value = f.name || '';
-                row.querySelector('.f-use').value = f.use || '';
-                row.querySelector('.f-loss').value = f.loss || 0;
-                row.querySelector('.f-curr').value = f.curr || 'KGS';
-                row.querySelector('.f-price').value = f.price || '';
-                row.querySelector('.f-rate').value = f.rate || 1;
-                row.querySelector('.f-dav').checked = f.dav || false;
-
-                // ИСПРАВЛЕНИЕ: Разблокируем поле курса, если валюта не сом
-                const rateInput = row.querySelector('.f-rate');
-                if (f.curr !== 'KGS') {
-                    rateInput.disabled = false;
-                    rateInput.style.opacity = "1";
-                }
-            });
-        }
-
-        // Восстанавливаем клеевые
-        if (data.glues) {
-            document.getElementById('glue-list').innerHTML = '';
-            data.glues.forEach(g => {
-                addGlue();
-                const row = document.querySelector('#glue-list .glue-row:last-child');
-                row.querySelector('.g-name').value = g.name || '';
-                row.querySelector('.g-mode').value = g.mode || 'm';
-                row.querySelector('.g-price').value = g.price || '';
-                row.querySelector('.g-roll-len').value = g.roll || '';
-                row.querySelector('.f-use-cm').value = g.use || '';
-                row.querySelector('.g-dav').checked = g.dav || false;
-
-                // Проверка для клеевых (если добавите туда валюту позже)
-                const rateIn = row.querySelector('.g-rate');
-                if (rateIn && g.curr && g.curr !== 'KGS') {
-                    rateIn.disabled = false;
-                    rateIn.style.opacity = "1";
-                }
-            });
-        }
-
-        // Восстанавливаем фурнитуру
-        if (data.accs) {
-            document.getElementById('acc-list').innerHTML = '';
-            data.accs.forEach(a => {
-                addAcc();
-                const row = document.querySelector('#acc-list .acc-row:last-child');
-                row.querySelector('.a-name').value = a.name;
-                row.querySelector('.a-unit').value = a.unit;
-                row.querySelector('.a-price').value = a.price;
-                row.querySelector('.a-use').value = a.use;
-                row.querySelector('.a-dav').checked = a.dav;
-            });
-        }
-
-        const fotInputs = document.querySelectorAll('.fot-in');
-        if (data.fot_values) {
-            data.fot_values.forEach((val, i) => { if (fotInputs[i]) fotInputs[i].value = val; });
-        }
-        if(typeof calc === "function") calc();
+ 
+window.addEventListener('load', loadFromLocal);
+ 
+// ── CLIENT RATE ──
+function toggleClientRate() {
+  const curr = document.getElementById('cl_curr').value;
+  const ri = document.getElementById('cl_rate');
+  document.getElementById('cl_curr_label').innerText = curr;
+  ri.disabled = (curr === 'KGS');
+  if(curr === 'KGS') ri.value = 1; else { ri.value = ''; ri.placeholder = 'Введите курс'; }
+  saveToLocal();
+}
+ 
+// ── ADD FABRIC ──
+function addFabric() {
+  const n = document.querySelectorAll('.fabric-row').length + 1;
+  const html = `
+  <div class="mat-row fabric-row">
+    <div class="mat-row-title">
+      <span>ТКАНЬ #${n}</span>
+      <button class="btn-del" onclick="this.closest('.fabric-row').remove(); calc()">×</button>
+    </div>
+    <div class="fr"><label class="label">Название</label><input type="text" class="fi f-name" placeholder="Ткань верха, подклад..." oninput="saveToLocal()"></div>
+    <div class="fr2">
+      <div><label class="label">Расход (м)</label><input type="number" class="fi f-use" oninput="calc()" placeholder="0.00"></div>
+      <div><label class="label">Выпад %</label><input type="number" class="fi f-loss" oninput="calc()" value="0" placeholder="0"></div>
+    </div>
+    <div class="fr3">
+      <div>
+        <label class="label">Валюта</label>
+        <select class="fi f-curr" onchange="toggleFabricRate(this); calc()">
+          <option value="KGS">сом</option><option value="USD">$</option><option value="RUB">₽</option>
+        </select>
+      </div>
+      <div><label class="label">Цена / м</label><input type="number" class="fi f-price" oninput="calc()" placeholder="0"></div>
+      <div><label class="label">Курс</label><input type="number" class="fi f-rate" oninput="calc()" value="1" disabled style="opacity:.4"></div>
+    </div>
+    <div class="price-badge f-price-som"></div>
+    <div class="mat-result">
+      <span class="mat-result-label">Итого на 1 ед.</span>
+      <span class="mat-result-val f-unit-result">0 сом</span>
+    </div>
+    <label class="check-wrap"><input type="checkbox" class="f-dav" onchange="calc()"><span>Давальческое (не считать в себестоимость)</span></label>
+  </div>`;
+  document.getElementById('fabric-list').insertAdjacentHTML('beforeend', html);
+}
+ 
+function toggleFabricRate(sel) {
+  const row = sel.closest('.fabric-row');
+  const ri = row.querySelector('.f-rate');
+  ri.disabled = (sel.value === 'KGS');
+  ri.style.opacity = (sel.value === 'KGS') ? '0.4' : '1';
+  if(sel.value === 'KGS') ri.value = 1;
+  saveToLocal();
+}
+ 
+// ── ADD GLUE ──
+function addGlue() {
+  const n = document.querySelectorAll('.glue-row').length + 1;
+  const html = `
+  <div class="mat-row glue-row">
+    <div class="mat-row-title">
+      <span>КЛЕЕВАЯ #${n}</span>
+      <button class="btn-del" onclick="this.closest('.glue-row').remove(); calc()">×</button>
+    </div>
+    <div class="fr"><label class="label">Название</label><input type="text" class="fi g-name" placeholder="Флизелин, дублерин..." oninput="saveToLocal()"></div>
+    <div class="fr">
+      <label class="label">Тип закупки</label>
+      <select class="fi g-mode" onchange="toggleRoll(this); updateGlueLabels(this); calc()">
+        <option value="m">По метрам</option><option value="roll">Рулоном</option>
+      </select>
+    </div>
+    <div class="fr2">
+      <div><label class="label g-price-label">Цена за 1 метр</label><input type="number" class="fi g-price" oninput="calc()" placeholder="0"></div>
+      <div><label class="label">Метров в рулоне</label><input type="number" class="fi g-roll-len" oninput="calc()" disabled style="opacity:.4" placeholder="0"></div>
+    </div>
+    <div class="fr"><label class="label g-use-label">Расход на 1 ед. (см)</label><input type="number" class="fi f-use-cm" oninput="calc()" placeholder="0"></div>
+    <div class="mat-result">
+      <span class="mat-result-label">Итого на 1 ед.</span>
+      <span class="mat-result-val g-unit-result">0 сом</span>
+    </div>
+    <label class="check-wrap"><input type="checkbox" class="g-dav" onchange="calc()"><span>Давальческое</span></label>
+  </div>`;
+  document.getElementById('glue-list').insertAdjacentHTML('beforeend', html);
+}
+ 
+function updateGlueLabels(sel) {
+  const row = sel.closest('.glue-row');
+  row.querySelector('.g-price-label').innerText = sel.value === 'm' ? "Цена за 1 метр (сом)" : "Цена за рулон (сом)";
+}
+ 
+function toggleRoll(sel) {
+  const ri = sel.closest('.glue-row').querySelector('.g-roll-len');
+  ri.disabled = (sel.value === 'm');
+  ri.style.opacity = (sel.value === 'm') ? '0.4' : '1';
+  saveToLocal();
+}
+ 
+// ── ADD ACC ──
+function addAcc() {
+  const n = document.querySelectorAll('.acc-row').length + 1;
+  const html = `
+  <div class="mat-row acc-row">
+    <div class="mat-row-title">
+      <span>ФУРНИТУРА #${n}</span>
+      <button class="btn-del" onclick="this.closest('.acc-row').remove(); calc()">×</button>
+    </div>
+    <div class="fr"><label class="label">Название</label><input type="text" class="fi a-name" placeholder="Пуговица, молния, нитки..." oninput="saveToLocal()"></div>
+    <div class="fr">
+      <label class="label">Единица измерения</label>
+      <select class="fi a-unit" onchange="updateAccLabels(this); calc()">
+        <option value="шт">штука (шт)</option><option value="м">метр (м)</option>
+      </select>
+    </div>
+    <div class="fr2">
+      <div><label class="label a-price-label">Цена за 1 шт (сом)</label><input type="number" class="fi a-price" oninput="calc()" placeholder="0"></div>
+      <div><label class="label a-use-label">Кол-во на 1 ед.</label><input type="number" class="fi a-use" oninput="calc()" placeholder="0"></div>
+    </div>
+    <div class="mat-result">
+      <span class="mat-result-label">Итого на 1 ед.</span>
+      <span class="mat-result-val a-unit-result">0 сом</span>
+    </div>
+    <label class="check-wrap"><input type="checkbox" class="a-dav" onchange="calc()"><span>Давальческое</span></label>
+  </div>`;
+  document.getElementById('acc-list').insertAdjacentHTML('beforeend', html);
+}
+ 
+function updateAccLabels(sel) {
+  const row = sel.closest('.acc-row');
+  row.querySelector('.a-price-label').innerText = sel.value === 'шт' ? "Цена за 1 шт (сом)" : "Цена за 1 метр (сом)";
+  row.querySelector('.a-use-label').innerText = sel.value === 'шт' ? "Кол-во на 1 ед." : "Метров на 1 ед.";
+  saveToLocal();
+}
+ 
+// ── CALC ──
+let calcId = null; // stable calc ID per session
+function calc() {
+  saveToLocal();
+  if(!calcId) calcId = Math.floor(Math.random()*900000)+100000;
+ 
+  const qty = parseFloat(document.getElementById('qty').value) || 0;
+  const taxRate = parseFloat(document.getElementById('tax_rate').value) || 0;
+  const fixedExp = parseFloat(document.getElementById('fixed_exp').value) || 0;
+  const clPriceVal = parseFloat(document.getElementById('price_cl_val').value) || 0;
+  const clRate = parseFloat(document.getElementById('cl_rate').value) || 1;
+  const clCurr = document.getElementById('cl_curr').value;
+  const mName = document.getElementById('m_name').value || 'Без названия';
+ 
+  const fmt = v => v.toLocaleString('ru-RU',{minimumFractionDigits:0,maximumFractionDigits:2});
+ 
+  let totalFabricsUnit=0, totalGluesUnit=0, totalAccsUnit=0;
+ 
+  document.getElementById('res_date_full').innerText = new Date().toLocaleString('ru-RU');
+  document.getElementById('res_id').innerText = calcId;
+ 
+  let fabricConsumHTML = '';
+  let matRows = '';
+ 
+  document.querySelectorAll('.fabric-row').forEach(row => {
+    const name = row.querySelector('.f-name').value || 'Ткань';
+    const p = parseFloat(row.querySelector('.f-price').value) || 0;
+    const r = parseFloat(row.querySelector('.f-rate').value) || 1;
+    const u = parseFloat(row.querySelector('.f-use').value) || 0;
+    const lVal = parseFloat(row.querySelector('.f-loss').value) || 0;
+    const l = 1+(lVal/100);
+    const isDav = row.querySelector('.f-dav').checked;
+    const curr = row.querySelector('.f-curr').value;
+    const somBadge = row.querySelector('.f-price-som');
+    const resBadge = row.querySelector('.f-unit-result');
+    if(curr !== 'KGS' && p>0 && r>1) somBadge.innerText = fmt(p*r)+' сом/м'; else somBadge.innerText='';
+    const costUnit = p*r*u*l;
+    resBadge.innerText = fmt(costUnit)+' сом';
+    if(u>0) {
+      if(!isDav) totalFabricsUnit += costUnit;
+      const consumption = u*l;
+      fabricConsumHTML += `<div class="sum-row"><span class="sum-row-label">${name} (расход/ед)</span><span class="sum-row-val accent">${fmt(consumption)} м</span></div>`;
+      let buyInfo = `${p} ${curr}`; if(curr!=='KGS') buyInfo+=` (курс: ${r})`;
+      matRows += `<tr><td><div class="td-name">${name}${isDav?' <span style="color:var(--text3);font-size:10px">(дав.)</span>':''}</div><div class="td-sub">${buyInfo} · брак ${lVal}%</div></td><td class="td-center">${fmt(consumption)} м</td><td class="td-right">${fmt(consumption*qty)} м</td></tr>`;
     }
-
-    window.addEventListener('load', loadFromLocal);
-
-    function goToStep(n) {
-        currentStep = n;
-        document.querySelectorAll('.step-content').forEach(s => s.classList.remove('active'));
-        document.getElementById('step-'+n).classList.add('active');
-        document.getElementById('step-title').innerText = titles[n-1];
-        document.getElementById('btn-back').style.display = n > 1 ? 'block' : 'none';
-        document.querySelectorAll('.nav-item').forEach((btn, i) => {
-            const stepMapping = [1, 2, 5, 7, 8];
-            btn.classList.toggle('active', n === stepMapping[i]);
-        });
-        window.scrollTo(0,0);
-        if(n === 8) calc();
+  });
+ 
+  document.querySelectorAll('.glue-row').forEach(row => {
+    const name = row.querySelector('.g-name').value || 'Клеевая';
+    const mode = row.querySelector('.g-mode').value;
+    const p = parseFloat(row.querySelector('.g-price').value) || 0;
+    const rL = parseFloat(row.querySelector('.g-roll-len').value) || 1;
+    const u = parseFloat(row.querySelector('.f-use-cm').value) || 0;
+    const isDav = row.querySelector('.g-dav').checked;
+    const resBadge = row.querySelector('.g-unit-result');
+    const priceM = (mode==='roll') ? (p/rL) : p;
+    const finalUnitCost = priceM*(u/100);
+    resBadge.innerText = fmt(finalUnitCost)+' сом';
+    if(u>0) {
+      if(!isDav) totalGluesUnit += finalUnitCost;
+      matRows += `<tr><td><div class="td-name">${name}${isDav?' <span style="color:var(--text3);font-size:10px">(дав.)</span>':''}</div></td><td class="td-center">${fmt(u)} см</td><td class="td-right">${fmt((u/100)*qty)} м</td></tr>`;
     }
-
-    function goBack() { if (currentStep > 1) goToStep(currentStep - 1); }
-
-    function toggleClientRate() {
-        const curr = document.getElementById('cl_curr').value;
-        const rateIn = document.getElementById('cl_rate');
-        document.getElementById('cl_curr_label').innerText = curr;
-        rateIn.disabled = (curr === 'KGS');
-        if(curr === 'KGS') { rateIn.value = 1; } else { rateIn.value = ''; rateIn.placeholder = "Введите курс"; }
-        saveToLocal();
-    }
-
-    function addFabric() {
-        const html = `
-        <div class="row-item fabric-row" style="grid-template-columns: repeat(3, 1fr);">
-            <div style="grid-column: span 3;"><label class="label">Название (Ткань/Подклад)</label><input type="text" class="f-name" oninput="saveToLocal()"></div>
-            <div style="grid-column: span 3;"><label class="label">Расход (М)</label><input type="number" class="f-use" oninput="calc()"></div>
-            <div style="grid-column: span 3;"><label class="label">Брак и обрезки ткани (выпад %)</label><input type="number" class="f-loss" oninput="calc()" value="0"></div>
-            <div><label class="label">Валюта</label>
-                <select class="f-curr" onchange="toggleFabricRate(this); calc()">
-                    <option value="KGS">сом</option><option value="USD">$</option><option value="RUB">₽</option>
-                </select>
-            </div>
-            <div><label class="label">Цена (м)</label><input type="number" class="f-price" oninput="calc()"></div>
-            <div><label class="label">Курс за 1$</label><input type="number" class="f-rate" oninput="calc()" value="1" disabled></div>
-            <div style="grid-column: span 3;">
-                <span class="price-som-badge f-price-som"></span>
-                <label class="label">Итого на 1 ед:</label>
-                <span class="price-som-badge f-unit-result" style="margin-top:0; font-size:14px; color:var(--text)">0 сом</span>
-            </div>
-            <div style="grid-column: span 2;"><label class="label"><input type="checkbox" class="f-dav" onchange="calc()"> Давальческое</label></div>
-            <div style="text-align:right;"><button class="btn-del" onclick="this.parentElement.parentElement.remove(); calc()">×</button></div>
-        </div>`;
-        document.getElementById('fabric-list').insertAdjacentHTML('beforeend', html);
-    }
-
-    function toggleFabricRate(sel) {
-        const row = sel.closest('.fabric-row');
-        row.querySelector('.f-rate').disabled = (sel.value === 'KGS');
-        if(sel.value === 'KGS') row.querySelector('.f-rate').value = 1;
-        saveToLocal();
-    }
-
-    function addGlue() {
-        const html = `
-        <div class="row-item glue-row">
-            <div style="grid-column: span 6;"><label class="label">Название клеевой</label><input type="text" class="g-name" oninput="saveToLocal()"></div>
-            <div style="grid-column: span 6;"><label class="label">ТИП ЗАКУПКИ</label>
-                <select class="g-mode" onchange="toggleRoll(this); updateGlueLabels(this); calc()">
-                    <option value="m">Метр</option><option value="roll">Рулон</option>
-                </select>
-            </div>
-            <div><label class="label g-price-label">Цена за 1 метр</label><input type="number" class="g-price" oninput="calc()"></div>
-            <div><label class="label">Метров в рулоне</label><input type="number" class="g-roll-len" oninput="calc()" disabled></div>
-            <div><label class="label g-use-label">Расход на 1 ед. (см)</label><input type="number" class="f-use-cm" oninput="calc()"></div>
-            <div><button class="btn-del" onclick="this.parentElement.parentElement.remove(); calc()">×</button></div>
-            <div style="grid-column: span 6;">
-                <label class="label">Итого на 1 ед:</label>
-                <span class="price-som-badge g-unit-result" style="margin-top:0; font-size:14px; color:var(--text)">0 сом</span>
-            </div>
-            <div style="grid-column: span 6;"><label class="label"><input type="checkbox" class="g-dav" onchange="calc()"> Давальческое</label></div>
-        </div>`;
-        document.getElementById('glue-list').insertAdjacentHTML('beforeend', html);
-    }
-
-    function updateGlueLabels(sel) {
-        const row = sel.closest('.glue-row');
-        row.querySelector('.g-price-label').innerText = sel.value === 'm' ? "Цена за 1 метр (сом)" : "Цена за рулон (сом)";
-    }
-
-    function toggleRoll(sel) { sel.closest('.glue-row').querySelector('.g-roll-len').disabled = (sel.value === 'm'); saveToLocal(); }
-
-    function addAcc() {
-        const html = `
-        <div class="row-item acc-row">
-            <div style="grid-column: span 6;"><label class="label">Фурнитура</label><input type="text" class="a-name" oninput="saveToLocal()"></div>
-            <div style="grid-column: span 6;"><label class="label">Тип</label>
-                <select class="a-unit" onchange="updateAccLabels(this); calc()">
-                    <option value="шт">шт</option>
-                    <option value="м">м</option>
-                </select>
-            </div>
-            <div style="grid-column: span 3;">
-                <label class="label a-price-label">Цена за 1 шт (сом)</label>
-                <input type="number" class="a-price" oninput="calc()">
-            </div>
-            <div style="grid-column: span 3;">
-                <label class="label a-use-label">Кол-во (на 1 ед)</label>
-                <input type="number" class="a-use" oninput="calc()">
-            </div>
-            <div style="grid-column: span 6; margin-top:5px;">
-                <label class="label">Итого на 1 ед:</label>
-                <span class="price-som-badge a-unit-result" style="margin-top:0; font-size:14px; color:var(--text)">0 сом</span>
-            </div>
-            <div style="grid-column: span 5;"><label class="label"><input type="checkbox" class="a-dav" onchange="calc()"> Давальческое</label></div>
-            <div style="text-align:right;"><button class="btn-del" onclick="this.parentElement.parentElement.remove(); calc()">×</button></div>
-        </div>`;
-        document.getElementById('acc-list').insertAdjacentHTML('beforeend', html);
-    }
-
-    function updateAccLabels(sel) {
-        const row = sel.closest('.acc-row');
-        row.querySelector('.a-price-label').innerText = sel.value === 'шт' ? "Цена за 1 шт (сом)" : "Цена за 1 метр (сом)";
-        saveToLocal();
-    }
-
-    function calc() {
-    saveToLocal();
-    const qty = parseFloat(document.getElementById('qty').value) || 0;
-    const taxRate = parseFloat(document.getElementById('tax_rate').value) || 0;
-    const fixedExp = parseFloat(document.getElementById('fixed_exp').value) || 0;
-    const clPriceVal = parseFloat(document.getElementById('price_cl_val').value) || 0;
-    const clRate = parseFloat(document.getElementById('cl_rate').value) || 1;
-    const clCurr = document.getElementById('cl_curr').value;
-    const mName = document.getElementById('m_name').value || 'Без названия';
-
-    const fmt = (val) => val.toLocaleString('ru-RU', {
-        minimumFractionDigits: 0,
-        maximumFractionDigits: 2
-    });
-
-    let totalFabricsUnit = 0;
-    let totalGluesUnit = 0;
-    let totalAccsUnit = 0;
-
-    const now = new Date();
-    document.getElementById('res_date_full').innerText = now.toLocaleString('ru-RU');
-    document.getElementById('res_id').innerText = Math.floor(Math.random() * 900000) + 100000;
-
-    let fabricConsumHTML = '';
-    let materialsHTML = `
-        <div class="buy-title" style="margin-top:20px; color: #0071E3; border-bottom: 2px solid #0071E3;">3. ДЕТАЛЬНЫЙ РАСХОД МАТЕРИАЛОВ</div>
-        <table style="width:100%; border-collapse: collapse; font-size: 12px; margin-top: 10px; color: white;" id="materials-table">
-            <thead>
-                <tr style="border-bottom: 2px solid #38383a; text-align: left; color: #86868b;">
-                    <th style="padding: 8px 4px;">Наименование</th>
-                    <th style="padding: 8px 4px; text-align: center;">На 1 ед.</th>
-                    <th style="padding: 8px 4px; text-align: right;">Всего на партию</th>
-                </tr>
-            </thead>
-            <tbody>
-    `;
-
-    document.querySelectorAll('.fabric-row').forEach(row => {
-        const name = row.querySelector('.f-name').value || 'Ткань';
-        const p = parseFloat(row.querySelector('.f-price').value) || 0;
-        const r = parseFloat(row.querySelector('.f-rate').value) || 1;
-        const u = parseFloat(row.querySelector('.f-use').value) || 0;
-        const lVal = parseFloat(row.querySelector('.f-loss').value) || 0;
-        const l = 1 + (lVal / 100);
-        const isDav = row.querySelector('.f-dav').checked;
-        const curr = row.querySelector('.f-curr').value;
-        const somBadge = row.querySelector('.f-price-som');
-        const resBadge = row.querySelector('.f-unit-result');
-
-        if (curr !== 'KGS' && p > 0 && r > 1) {
-            somBadge.innerText = fmt(p * r) + ' сом/м';
-        } else {
-            somBadge.innerText = '';
-        }
-
-        const costUnit = p * r * u * l;
-        resBadge.innerText = fmt(costUnit) + ' сом';
-
-        if (u > 0) {
-            if(!isDav) totalFabricsUnit += costUnit;
-            const consumption = u * l;
-            const totalConsumption = consumption * qty;
-
-            let buyInfo = `${p} ${curr}`;
-            if (curr !== 'KGS') buyInfo += ` (курс: ${r})`;
-
-            fabricConsumHTML += `<div class="sum-item"><span>${name} (расход):</span><b style="color:var(--primary)">${fmt(consumption)} м / ед</b></div>`;
-
-            materialsHTML += `
-                <tr style="border-bottom: 1px solid #2c2c2e;">
-                    <td style="padding: 10px 4px;">
-                        <b style="color:#fff;">${name}</b>${isDav ? ' <i style="color:#86868b;">(Дав.)</i>' : ''}
-                        <br><span style="font-size:10px; color:#86868b;">Закуп: ${buyInfo}</span>
-                        <br><span style="font-size:10px; color:#86868b;">Брак: ${lVal}%</span>
-                    </td>
-                    <td style="padding: 10px 4px; text-align: center; color:#ccc;">${fmt(consumption)} м</td>
-                    <td style="padding: 10px 4px; text-align: right; color:#0071E3; font-weight:700;">${fmt(totalConsumption)} м</td>
-                </tr>`;
-        }
-    });
-
-    document.querySelectorAll('.glue-row').forEach(row => {
-        const name = row.querySelector('.g-name').value || 'Клеевая';
-        const mode = row.querySelector('.g-mode').value;
-        const p = parseFloat(row.querySelector('.g-price').value) || 0;
-        const rL = parseFloat(row.querySelector('.g-roll-len').value) || 1;
-        const u = parseFloat(row.querySelector('.f-use-cm').value) || 0;
-        const isDav = row.querySelector('.g-dav').checked;
-        const resBadge = row.querySelector('.g-unit-result');
-        const priceM = (mode === 'roll') ? (p/rL) : p;
-        const finalUnitCost = (priceM * (u/100));
-        resBadge.innerText = fmt(finalUnitCost) + ' сом';
-
-        if (u > 0) {
-            if(!isDav) totalGluesUnit += finalUnitCost;
-            materialsHTML += `<tr style="border-bottom: 1px solid #2c2c2e;"><td style="padding: 10px 4px;">${name}${isDav ? ' (Дав.)' : ''}</td><td style="padding: 10px 4px; text-align: center; color:#ccc;">${fmt(u)} см</td><td style="padding: 10px 4px; text-align: right; font-weight:700;">${fmt((u/100) * qty)} м</td></tr>`;
-        }
-    });
-
-    document.querySelectorAll('.acc-row').forEach(row => {
+  });
+ 
+  document.querySelectorAll('.acc-row').forEach(row => {
     const name = row.querySelector('.a-name').value || 'Фурнитура';
     const p = parseFloat(row.querySelector('.a-price').value) || 0;
     const u = parseFloat(row.querySelector('.a-use').value) || 0;
-
-    // ВАЖНО: Достаем выбранное значение (шт или м)
     const unit = row.querySelector('.a-unit').value;
-
     const isDav = row.querySelector('.a-dav').checked;
     const resBadge = row.querySelector('.a-unit-result');
-    const costUnit = p * u;
-    resBadge.innerText = fmt(costUnit) + ' сом';
-
-    if (u > 0) {
-        if(!isDav) totalAccsUnit += costUnit;
-
-        // В строке ниже мы ДОБАВЛЯЕМ ${unit} после цифр
-        materialsHTML += `
-            <tr style="border-bottom: 1px solid #2c2c2e;">
-                <td style="padding: 10px 4px; color: #fff;">${name}${isDav ? ' (Дав.)' : ''}</td>
-                <td style="padding: 10px 4px; text-align: center; color:#ccc;">${fmt(u)} ${unit}</td>
-                <td style="padding: 10px 4px; text-align: right; color: #0071E3; font-weight:700;">${fmt(u * qty)} ${unit}</td>
-            </tr>`;
+    const costUnit = p*u;
+    resBadge.innerText = fmt(costUnit)+' сом';
+    if(u>0) {
+      if(!isDav) totalAccsUnit += costUnit;
+      matRows += `<tr><td><div class="td-name">${name}${isDav?' <span style="color:var(--text3);font-size:10px">(дав.)</span>':''}</div></td><td class="td-center">${fmt(u)} ${unit}</td><td class="td-right">${fmt(u*qty)} ${unit}</td></tr>`;
     }
-});
-
-    materialsHTML += `</tbody></table>`;
-    const fotUnit = Array.from(document.querySelectorAll('.fot-in')).reduce((s, i) => s + (parseFloat(i.value) || 0), 0);
-    document.getElementById('fot-total-badge').innerText = fmt(fotUnit) + ' сом';
-
-    const unitCostRaw = totalFabricsUnit + totalGluesUnit + totalAccsUnit + fotUnit + fixedExp;
-    const unitCost = Math.round(unitCostRaw * 100) / 100;
-    const totalExp = unitCost * qty;
-    const revenueSom = Math.round((clPriceVal * clRate * qty) * 100) / 100;
-    const tax = revenueSom * taxRate;
-    const profit = revenueSom - totalExp - tax;
-
-    // --- НОВАЯ ЛОГИКА ПРИБЫЛИ НА ЕДИННИЦУ ---
-    const profitUnitSom = qty > 0 ? (profit / qty) : 0;
-    const profitUnitClient = clRate > 0 ? (profitUnitSom / clRate) : 0;
-
-    document.getElementById('res_m_name').innerText = mName;
-    document.getElementById('res_qty').innerText = qty + ' шт';
-    document.getElementById('monitor_cost').innerText = fmt(unitCost) + ' сом';
-    document.getElementById('res_unit_cost').innerText = fmt(unitCost) + ' сом';
-    document.getElementById('res_total_exp').innerText = fmt(totalExp) + ' сом';
-    document.getElementById('res_revenue').innerText = fmt(revenueSom) + ' сом';
-    document.getElementById('res_tax').innerText = fmt(tax) + ' сом';
-    document.getElementById('res_rate_val').innerText = `1 ${clCurr} = ${clRate} сом`;
-
-    const profitEl = document.getElementById('res_profit');
-    profitEl.innerText = profit.toLocaleString('ru-RU', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' сом';
-    profitEl.style.color = profit < 0 ? 'var(--danger)' : 'var(--success)';
-
-    // ВЫВОД ПРИБЫЛИ С ОДНОГО ИЗДЕЛИЯ
-    if (document.getElementById('res_unit_profit_box')) {
-        document.getElementById('res_unit_profit_box').innerHTML = `
-            <div style="margin-top: 15px; padding: 12px; background: rgba(48, 209, 88, 0.1); border-radius: 12px; border: 1px dashed var(--success);">
-                <div style="font-size: 11px; color: #86868b; text-transform: uppercase; margin-bottom: 4px;">Прибыль с 1 изделия:</div>
-                <div style="font-size: 18px; font-weight: 800; color: var(--success);">
-                    ${fmt(profitUnitSom)} сом
-                    <span style="font-size: 14px; color: #86868b; font-weight: 400; margin-left: 5px;">/ ${fmt(profitUnitClient)} ${clCurr}</span>
-                </div>
-            </div>`;
-    }
-
-    const setRes = (id, uVal) => {
-        const unitV = Math.round(uVal * 100) / 100;
-        const totalV = unitV * qty;
-        document.getElementById(id).innerHTML = `<span style="font-weight:400; color:#86868b; margin-right:10px;">(${fmt(unitV)} сом/ед)</span><span>${fmt(totalV)} сом</span>`;
-    };
-    setRes('res_sum_fabrics', totalFabricsUnit);
-    setRes('res_sum_glues', totalGluesUnit);
-    setRes('res_sum_accs', totalAccsUnit);
-    setRes('res_sum_fot', fotUnit);
-    setRes('res_sum_fixed', fixedExp);
-
-    let subText = `Выручка: ${fmt(clPriceVal * qty)} ${clCurr}`;
-    if(clCurr !== 'KGS') subText += ` | В сомах: ${fmt(revenueSom)} сом`;
-    document.getElementById('cl_price_sub').innerText = clPriceVal > 0 ? subText : "";
-
-    document.getElementById('res_fabric_consumption_list').innerHTML = fabricConsumHTML;
-    document.getElementById('res_detailed_materials').innerHTML = materialsHTML;
+  });
+ 
+  const fotUnit = Array.from(document.querySelectorAll('.fot-in')).reduce((s,i)=>s+(parseFloat(i.value)||0),0);
+  document.getElementById('fot-total-badge').innerText = fmt(fotUnit)+' сом';
+ 
+  const unitCost = Math.round((totalFabricsUnit+totalGluesUnit+totalAccsUnit+fotUnit+fixedExp)*100)/100;
+  const totalExp = unitCost*qty;
+  const revenueSom = Math.round((clPriceVal*clRate*qty)*100)/100;
+  const tax = revenueSom*taxRate;
+  const profit = revenueSom-totalExp-tax;
+  const profitUnit = qty>0 ? profit/qty : 0;
+  const profitUnitCl = clRate>0 ? profitUnit/clRate : 0;
+ 
+  document.getElementById('res_m_name').innerText = mName.toUpperCase();
+  document.getElementById('res_qty').innerText = qty+' шт';
+  document.getElementById('monitor_cost').innerText = fmt(unitCost)+' сом';
+  document.getElementById('res_unit_cost').innerText = fmt(unitCost)+' сом';
+  document.getElementById('res_total_exp').innerText = fmt(totalExp)+' сом';
+  document.getElementById('res_revenue').innerText = fmt(revenueSom)+' сом';
+  document.getElementById('res_tax').innerText = fmt(tax)+' сом';
+  document.getElementById('res_rate_val').innerText = `1 ${clCurr} = ${clRate} сом`;
+ 
+  const profitEl = document.getElementById('res_profit');
+  profitEl.innerText = profit.toLocaleString('ru-RU',{minimumFractionDigits:2,maximumFractionDigits:2})+' сом';
+  profitEl.className = 'summary-profit'+(profit<0?' loss':'');
+ 
+  document.getElementById('res_unit_profit_box').innerHTML = `
+    <div style="font-size:11px;color:var(--text2);margin-bottom:4px;text-transform:uppercase;letter-spacing:.1em;">Прибыль с 1 изделия</div>
+    <b>${fmt(profitUnit)} сом <span style="font-size:13px;font-weight:400;color:var(--text2)">/ ${fmt(profitUnitCl)} ${clCurr}</span></b>`;
+ 
+  const setRes=(id,uVal)=>{
+    const uv=Math.round(uVal*100)/100,tv=uv*qty;
+    document.getElementById(id).innerHTML=`<span style="font-weight:400;color:var(--text2);margin-right:8px;font-size:11px">${fmt(uv)}/ед</span>${fmt(tv)} сом`;
+  };
+  setRes('res_sum_fabrics',totalFabricsUnit);
+  setRes('res_sum_glues',totalGluesUnit);
+  setRes('res_sum_accs',totalAccsUnit);
+  setRes('res_sum_fot',fotUnit);
+  setRes('res_sum_fixed',fixedExp);
+ 
+  let subText=`Выручка: ${fmt(clPriceVal*qty)} ${clCurr}`;
+  if(clCurr!=='KGS') subText+=` = ${fmt(revenueSom)} сом`;
+  document.getElementById('cl_price_sub').innerText = clPriceVal>0 ? subText : '';
+ 
+  document.getElementById('res_fabric_consumption_list').innerHTML = fabricConsumHTML;
+  document.getElementById('res_detailed_materials').innerHTML = matRows ? `
+    <table class="mat-table" id="materials-table">
+      <thead><tr><th>Материал</th><th style="text-align:center">На 1 ед.</th><th style="text-align:right">На партию</th></tr></thead>
+      <tbody>${matRows}</tbody>
+    </table>` : `<div style="text-align:center;color:var(--text3);padding:16px;font-size:13px">Материалы не добавлены</div>`;
 }
-
-
-    function shareWhatsApp() {
-    const mName = (document.getElementById('m_name').value || 'Без названия').toUpperCase();
-    const qty = document.getElementById('qty').value || 0;
-    const date = document.getElementById('res_date_full').innerText;
-    const resId = document.getElementById('res_id').innerText;
-
-    // Берем готовые красивые значения прямо с экрана (уже с округлением)
-    const unitCost = document.getElementById('res_unit_cost').innerText;
-    const totalExp = document.getElementById('res_total_exp').innerText;
-    const revenue = document.getElementById('res_revenue').innerText;
-    const tax = document.getElementById('res_tax').innerText;
-    const profit = document.getElementById('res_profit').innerText;
-
-    let message = `📝 *ОТЧЕТ ПО ЗАКАЗУ: ${mName}*\n`;
-    message += `🆔 ID: ${resId} | 📅 ${date}\n`;
-    message += `------------------------------------------\n`;
-    message += `📊 *ОСНОВНЫЕ ПОКАЗАТЕЛИ*\n`;
-    message += `• Объем партии: ${qty} шт.\n`;
-    message += `• Себестоимость ед.: ${unitCost}\n`;
-    message += `• Чистая прибыль: *${profit}*\n`;
-    message += `------------------------------------------\n`;
-
-    message += `💰 *1. ФИНАНСОВЫЕ ПОКАЗАТЕЛИ*\n`;
-    message += `• Общая выручка: ${revenue}\n`;
-    message += `• Общие расходы: ${totalExp}\n`;
-    message += `• Налог (0.25%): ${tax}\n`;
-    message += `------------------------------------------\n`;
-
-    message += `🏗 *2. ЗАТРАТЫ НА ПАРТИЮ*\n`;
-
-    // Функция для вытягивания текста из строк затрат
-    const getRowData = (id) => document.getElementById(id).innerText.replace(/\s+/g, ' ');
-
-    message += `• Ткани/Подклад: ${getRowData('res_sum_fabrics')}\n`;
-    message += `• Клеевые: ${getRowData('res_sum_glues')}\n`;
-    message += `• Фурнитура: ${getRowData('res_sum_accs')}\n`;
-    message += `• Работа (ФОТ): ${getRowData('res_sum_fot')}\n`;
-    message += `• Аренда/Цех: ${getRowData('res_sum_fixed')}\n`;
-    message += `------------------------------------------\n`;
-
-    message += `✂️ *3. ДЕТАЛЬНЫЙ РАСХОД МАТЕРИАЛОВ*\n`;
-
-    // Собираем данные из таблицы материалов
-    const tableRows = document.querySelectorAll('#materials-table tbody tr');
-    tableRows.forEach(row => {
-        const cols = row.querySelectorAll('td');
-        if (cols.length >= 3) {
-            const name = cols[0].innerText.split('\n')[0].trim(); // Только название
-            const perUnit = cols[1].innerText.trim();
-            const total = cols[2].innerText.trim();
-            message += `• ${name}: ${perUnit} (Всего: ${total})\n`;
-        }
-    });
-
-    message += `------------------------------------------\n`;
-    message += `🚀 _Создано в ЦЕХОВИК ERP_`;
-
-    const encodedMessage = encodeURIComponent(message);
-    window.open(`https://wa.me/?text=${encodedMessage}`, '_blank');
-}
-
-    // ТА САМАЯ ФУНКЦИЯ ОЧИСТКИ
-    function clearData() {
-        if (confirm("Вы точно хотите удалить все данные и начать новый расчет?")) {
-            localStorage.removeItem('cehovik_data');
-            location.reload();
-        }
+ 
+// ── WHATSAPP ──
+function shareWhatsApp() {
+  const mName = (document.getElementById('m_name').value||'Без названия').toUpperCase();
+  const qty = document.getElementById('qty').value||0;
+  const date = document.getElementById('res_date_full').innerText;
+  const resId = document.getElementById('res_id').innerText;
+  const unitCost = document.getElementById('res_unit_cost').innerText;
+  const totalExp = document.getElementById('res_total_exp').innerText;
+  const revenue = document.getElementById('res_revenue').innerText;
+  const tax = document.getElementById('res_tax').innerText;
+  const profit = document.getElementById('res_profit').innerText;
+  let msg = `⚙ *ЦЕХОВИК ERP — ОТЧЁТ*\n`;
+  msg += `📋 *${mName}*\n`;
+  msg += `🆔 ID: ${resId} | 📅 ${date}\n`;
+  msg += `━━━━━━━━━━━━━━━━━━━━\n`;
+  msg += `📦 Партия: ${qty} шт\n`;
+  msg += `💰 Себестоимость ед.: ${unitCost}\n`;
+  msg += `✅ Чистая прибыль: *${profit}*\n`;
+  msg += `━━━━━━━━━━━━━━━━━━━━\n`;
+  msg += `📊 *ФИНАНСЫ:*\n`;
+  msg += `• Выручка: ${revenue}\n• Расходы: ${totalExp}\n• Налог: ${tax}\n`;
+  msg += `━━━━━━━━━━━━━━━━━━━━\n`;
+  msg += `🏗 *ЗАТРАТЫ:*\n`;
+  const getRow=id=>document.getElementById(id).innerText.replace(/\s+/g,' ');
+  msg += `• Ткани: ${getRow('res_sum_fabrics')}\n`;
+  msg += `• Клеевые: ${getRow('res_sum_glues')}\n`;
+  msg += `• Фурнитура: ${getRow('res_sum_accs')}\n`;
+  msg += `• ФОТ: ${getRow('res_sum_fot')}\n`;
+  msg += `• Цех: ${getRow('res_sum_fixed')}\n`;
+  msg += `━━━━━━━━━━━━━━━━━━━━\n`;
+  msg += `✂️ *РАСХОД МАТЕРИАЛОВ:*\n`;
+  document.querySelectorAll('#materials-table tbody tr').forEach(row => {
+    const cols = row.querySelectorAll('td');
+    if(cols.length>=3) {
+      const name = cols[0].innerText.split('\n')[0].trim();
+      msg += `• ${name}: ${cols[1].innerText.trim()} → ${cols[2].innerText.trim()}\n`;
     }
+  });
+  msg += `━━━━━━━━━━━━━━━━━━━━\n🚀 _Создано в ЦЕХОВИК ERP_`;
+  window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`,'_blank');
+}
+ 
+function clearData() {
+  if(confirm('Удалить все данные и начать новый расчёт?')) {
+    localStorage.removeItem('cehovik_data');
+    calcId = null;
+    location.reload();
+  }
+}
+ 
+// Init
+renderDots();
 </script>
 </body>
 </html>
